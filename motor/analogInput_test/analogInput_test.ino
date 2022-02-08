@@ -18,16 +18,6 @@ void setup() {
 void loop() {
   // read the sensor value from piezo:
   int sensorReading = analogRead(A0); // Reads from pin A0
-  // map it to a range from 0 to 100:
-//  int motorSpeed = map(sensorReading, 0, 1023, 0, 100);
-  // set the motor speed:
-//  while(sensorReading< 100)
-  Serial.println(sensorReading); // Offsetting to start at 0
-// if(sensorReading > 10){
-//     if (motorSpeed > 0) {
-//      myStepper.setSpeed(motorSpeed);
-//      // step 1/100 of a revolution:
-//      myStepper.step(stepsPerRevolution / 2);
-//      }
-//    }
+  Serial.println(sensorReading);
+  delay(30);
 }
