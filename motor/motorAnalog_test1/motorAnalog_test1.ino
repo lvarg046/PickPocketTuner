@@ -30,7 +30,7 @@ int piezoIn = analogRead(A0);
 Serial.println(piezoIn);
 if( piezoIn > 15 ){ 
   flag = !flag; // Done to reverse the direction
-  tone(Passive_buzz, 329.63); // Making passive buzzer buzz at input hz
+  tone(Passive_buzz, 60); // Making passive buzzer buzz at input hz
   digitalWrite(1, flag); // New 
   analogWrite(15, 0); // New
   
