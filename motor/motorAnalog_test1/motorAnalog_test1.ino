@@ -18,7 +18,7 @@ bool flag = HIGH;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
-  // New
+  // New 
   pinMode(1, OUTPUT); // Direction control GPIO01/TXPin Orange Direction
   pinMode(15, OUTPUT); // Blue PWM Wire GPIO15/D8
   pinMode(Passive_buzz, OUTPUT); // Buzzer output Pin
