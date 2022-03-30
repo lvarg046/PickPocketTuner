@@ -61,7 +61,8 @@ ESP8266WebServer server(80);
 #define PWM_WIRE 15 // BLUE
 #define FG_WIRE 16 // GREEN
 
-// Removed Knight Image bitmap 
+// Removed Knight Image bitmap for readability
+
 /* GLOBAL VARIABLES */
 int motor_speed;
 bool motor_flag;
@@ -89,6 +90,7 @@ float tuning_base [12][2] = { // This is to use to find the octave we're in
     {739.99, 3.37}, // F#/Gb
     {783.99, 3.56} // G
 };
+
 
 float tuning_array [12][7] = { // Based on A - 440 Standard
     {12.98, 25.96, 51.91, 103.83, 207.65, 415.30, 830.61 }, // Ab/G# - Octaves
@@ -124,6 +126,12 @@ float premade_tuning_lib [11][6] = { // Based on A - 440 Standard
     {65.41, 98.00, 130.81, 196.00, 261.63, 329.63}, // Open C        C-G-C-G-C-E
     {82.41, 123.47, 164.81, 207.65, 246.94, 329.63} // Open E        E-B-E-G#-B-E
 };
+
+const char *lib_name[11]= {"E Std", "D Std", "Eb Std", "Drop D", "Drop C", "Drop A", 
+                            "Open D", "Open G", "Open C", "Open E"};
+                            
+const char *note_name[12] = {"G#/Ab", "A", "A#/Bb", "B", "C", "C#/Db", "D", "D#/Eb", 
+                            "E", "F", "F#/Gb", "G"};
 
 int freq_base_A[8] = {432, 434, 436, 438, 440, 442, 444, 446};
 float adjusted_base[12][2] = {0};
@@ -258,14 +266,19 @@ void drawIntroScreen() {
 
 //   display.drawRGBBitmap(0,0, knight, 240, 240);
   display.fillScreen(0x000F);
-  display.setCursor(10, 140);
+  display.setCursor(10, 100);
   display.setTextColor(ST77XX_WHITE, 0x000F);
+  display.setTextSize(3);
+  display.println( "Pick" );
+  display.setCursor(10, 140);
+  display.println( "Pocket" );
+  display.setCursor(10, 180);
+  display.println( "Tuner" );
   display.setTextSize(2);
-  display.println("Pick");
-  display.println("Pocket");
-  display.println("Tuner");
+  display.setCursor(10, 220);
+  display.println( "Group 42" );
   display.println();
-  delay(2000);
+  delay(3000);
 
   screen_value = 1;
   drawScreen();
@@ -277,14 +290,27 @@ void drawModeSelectionScreen() {
     drawLeftTriangle();
   if (mode_selected < 2)
     drawRightTriangle();
-  display.setCursor(10, 10);
+  display.setCursor(20, 10);
   display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
   display.setTextSize(3);
-  display.println("Group 42");
-  display.println("Mode Select");
-  display.println("Mode #" + (String)mode_selected);
+  display.println( "Select Mode" );
+
+// Mode 0: Auto Mode, Goes through all strings
+// Mode 1: Individual String Mode
+// Mode 2: Free Tuning Mode
+  if( mode_selected == 0 ){
+      display.setCursor(20, 40);
+      display.println( "Auto Tuning" );
+  } else if( mode_selected == 1 ){
+      display.setCursor(20, 40);
+      display.println( "Indv. String" );
+  } else if( mode_selected == 2) {
+      display.setCursor(20, 40);
+      display.println( "Free Tuning" );
+  }
 }
 
+// display.String# displays correct number of string in correct order.
 void drawStringSelectionScreen() {
   display.fillScreen(ST77XX_BLACK);
   if (string_selected > 0)
@@ -294,23 +320,24 @@ void drawStringSelectionScreen() {
   display.setCursor(10, 10);
   display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
   display.setTextSize(3);
-  display.println("Group 42");
-  display.println("String Select");
-  display.println("String #" + (String)string_selected);
+  display.println( "Select String" );
+  display.println( "String #" + (String)(string_selected + (6 - ( (string_selected * 2 ))))); 
 }
 
 void drawTuningLibrarySelectionScreen() {
   display.fillScreen(ST77XX_BLACK);
   if (library_selected > 0)
     drawLeftTriangle();
-  if (library_selected < 10)
+  if (library_selected < 9)
     drawRightTriangle();
   display.setCursor(10, 10);
   display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+  display.setTextSize(2);
+  display.println( "Select tuning from library" );
+  
   display.setTextSize(3);
-  display.println("Group 42");
-  display.println("Library Select");
-  display.println("Library #" + (String)library_selected);
+  display.setCursor(70, 110);
+  display.println( (String)(lib_name[library_selected]) );
 }
 
 void drawPluckStringScreen() {
@@ -318,9 +345,7 @@ void drawPluckStringScreen() {
   display.setCursor(10, 10);
   display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
   display.setTextSize(3);
-  display.println("Group 42");
-  display.println("Pluck String, bitch");
-  display.println("String #" + (String)string_selected);
+  display.println( "Pluck String " + (String)(string_selected + (6 - ((string_selected * 2)))) );
 
   // fft
   delay(500);
@@ -348,8 +373,7 @@ void drawFreeTuneScreen() {
   display.setCursor(10, 10);
   display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
   display.setTextSize(3);
-  display.println("Group 42");
-  display.println("Free Mode");
+  display.println( "Free Mode" );
 }
 
 void readWifiConf() {
@@ -376,27 +400,27 @@ bool connectToWiFi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(wifiConf.wifi_ssid, wifiConf.wifi_password);
   if (WiFi.waitForConnectResult() == WL_CONNECTED) {
-    Serial.print("Connected. IP: ");
+    Serial.print( "Connected. IP: " );
     Serial.println(WiFi.localIP());
     return true;
   } else {
-    Serial.println("Connection Failed!");
+    Serial.println( "Connection Failed!" );
     return false;
   }
 }
 
 void setUpAccessPoint() {
-    Serial.println("Setting up access point.");
+    Serial.println( "Setting up access point." );
     Serial.printf("SSID: %s\n", AP_ssid);
     Serial.printf("Password: %s\n", AP_password);
 
     WiFi.mode(WIFI_AP_STA);
     WiFi.softAPConfig(AP_IP, AP_IP, AP_subnet);
     if (WiFi.softAP(AP_ssid, AP_password)) {
-      Serial.print("Ready. Access point IP: ");
+      Serial.print( "Ready. Access point IP: " );
       Serial.println(WiFi.softAPIP());
     } else {
-      Serial.println("Setting up access point failed!");
+      Serial.println( "Setting up access point failed!" );
     }
 }
 
@@ -447,7 +471,7 @@ void handleWebServerRequest() {
   server.send(200, "text/html", message);
 
   if (save) {
-    Serial.println("Wi-Fi conf saved. Rebooting...");
+    Serial.println( "Wi-Fi conf saved. Rebooting..." );
     delay(1000);
     ESP.restart();
   }
@@ -462,11 +486,11 @@ void setUpOverTheAirProgramming() {
   // Change the name of how it is going to 
   // show up in Arduino IDE.
   // Default: esp8266-[ChipID]
-  // ArduinoOTA.setHostname("myesp8266");
+  // ArduinoOTA.setHostname("myesp8266" );
 
   // Re-programming passowrd. 
   // No password by default.
-  // ArduinoOTA.setPassword("123");
+  // ArduinoOTA.setPassword("123" );
 
   ArduinoOTA.begin();
 }
@@ -521,30 +545,30 @@ void print_hertz( float peak ){
             peak = 0.00;
             display.setTextSize(2);
             display.setCursor(30, 150);
-            display.println("Waiting for input");
+            display.println( "Waiting for input" );
             display.setCursor(60, 120);
             display.setTextSize(3);
 
         } else if( peak < 81.5){
             motor_flag = HIGH;
             display.print(peak, 2);
-            display.println("Hz     ");
+            display.println( "Hz     " );
             digitalWrite(DIR_WIRE, motor_flag);
             spinMotorFlat();
 
         } else if( peak > 83.50 ){
             motor_flag = LOW;
             display.print(peak, 2);
-            display.println("Hz     ");
+            display.println( "Hz     " );
             digitalWrite(DIR_WIRE, motor_flag);
             spinMotorSharp();
 
         } else {
             display.setCursor(60, 120);
             display.print(peak, 2);
-            display.println("Hz     ");
+            display.println( "Hz     " );
             display.setCursor(60, 150);
-            display.println("tuned-ish");
+            display.println( "tuned-ish" );
             test_value = 0;
             tone(BUZZ, 60);
             delay(10);
@@ -554,9 +578,9 @@ void print_hertz( float peak ){
         
         display.setCursor(60, 120);
         display.print(peak, 2);
-        display.println("Hz     ");
+        display.println( "Hz     " );
         display.setCursor(10, 10);
-        display.println("FOR DEMO PURPOSES ONLY");
+        display.println( "FOR DEMO PURPOSES ONLY" );
 }
 */
 
@@ -680,7 +704,7 @@ void device_operations() {
           break;
 
         case 3: // tuning library selection
-          if (library_selected < 10) {
+          if (library_selected < 9) {
             library_selected += 1;
             test_value = 0;
             drawScreen();
@@ -775,11 +799,11 @@ float algo_riddim(float input_fr, int std_fr_in, int std_fr_out, float table_440
     float base_out = base_freq_calc(tuning_base[7][0], tuning_base[7][1], freq_base_A[0], freq_base_A[6]);
     int octave = octave_calc(base_out, input_fr);;
 
-    Serial.print("Expect:627.91 BASE: ");
+    Serial.print( "Expect:627.91 BASE: " );
     Serial.println(base_out); 
     // int oct = octave_calc( tuning_base[4][0], tuning_array[4][1]);
 
-    Serial.print("Expect:4 Octave: ");
+    Serial.print( "Expect:4 Octave: " );
     Serial.println(octave);
     // float rebased = base_freq_calc( tuning_base[7][0], table_440_const, std_fr_in, std_fr_out);
     // octave = octave_calc(rebased, input_fr);
