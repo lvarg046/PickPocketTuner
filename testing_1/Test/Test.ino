@@ -61,6 +61,7 @@ ESP8266WebServer server(80);
 #define PWM_WIRE 15 // BLUE
 #define FG_WIRE 16 // GREEN
 
+// Removed Knight Image bitmap 
 /* GLOBAL VARIABLES */
 int motor_speed;
 bool motor_flag;
@@ -254,12 +255,16 @@ void drawRightTriangle() {
 }
 
 void drawIntroScreen() {
-  display.fillScreen(ST77XX_BLACK);
-  display.setCursor(10, 10);
-  display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
-  display.setTextSize(3);
-  display.println("Group 42");
-  display.println("Intro Screen");
+
+//   display.drawRGBBitmap(0,0, knight, 240, 240);
+  display.fillScreen(0x000F);
+  display.setCursor(10, 140);
+  display.setTextColor(ST77XX_WHITE, 0x000F);
+  display.setTextSize(2);
+  display.println("Pick");
+  display.println("Pocket");
+  display.println("Tuner");
+  display.println();
   delay(2000);
 
   screen_value = 1;
@@ -619,7 +624,7 @@ void device_operations() {
               break;
 
             case 2: // free tuning
-              screen_value = 5;
+              screen_value = 4;
               test_value = 0;
               drawScreen();
               break;
@@ -627,7 +632,7 @@ void device_operations() {
 
           break;
         case 2: // string selection
-          screen_value = 4;
+          screen_value = 5;
           test_value = 0;
           drawScreen();
           break;
@@ -639,7 +644,7 @@ void device_operations() {
             string_selected = 0;
             drawScreen();
           } else {
-            screen_value = 4;
+            screen_value = 5;
             drawScreen();
           }
           break;
@@ -833,24 +838,24 @@ void tuning_test( double input_freq ){
     freq_diff = current_freq - target_freq;
     current_freq = fft();
     current_cents = cents_calculate( current_freq, target_freq );
-    // 250ms for 5 cents, 100ms for 3 cents, 50ms for less than 3 cents
+    // 75ms for 5 cents, 35ms for 3 cents, 15ms for less than 3 cents
     if( current_cents >= 5 || current_cents <= -5){
       if( freq_diff < 0 ){  
-        spinMotorFlat(250, current_freq);
+        spinMotorSharp(75, current_freq);
       } else if( freq_diff > 0 ){
-        spinMotorSharp(250, current_freq);  
+        spinMotorFlat(75, current_freq);  
       }
     } else if( (current_cents >= 3 && current_cents < 5) || (current_cents <= -3 && current_cents > 5) ){
       if( freq_diff < 0 ){
-        spinMotorFlat(100, current_freq);
+        spinMotorSharp(35, current_freq);
       } else if ( freq_diff > 0 ){
-        spinMotorSharp(100, current_freq);
+        spinMotorFlat(35, current_freq);
       }
     } else {
       if( freq_diff < 0){
-        spinMotorFlat(50, current_freq);
+        spinMotorSharp(15, current_freq);
       } else if ( freq_diff > 0 ){
-        spinMotorSharp(50, current_freq);
+        spinMotorFlat(15, current_freq);
       }
     }
   }
