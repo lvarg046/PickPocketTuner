@@ -1,12 +1,13 @@
-/* WIFI CONNECTION LIBRARIES */
 #include <EEPROM.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ArduinoOTA.h>
 
+
 /* GRAPHICS/DISPLAY LIBRARIES */
 #include <Adafruit_GFX.h>
 #include <Adafruit_ST7789.h>
+#include <Fonts/FreeSerif9pt7b.h>
 
 /* FFT LIBRARY */
 #include "arduinoFFT.h"
@@ -178,11 +179,13 @@ void drawFreeTuneScreen();
 void drawPluckStringScreen();
 void drawLeftTriangle();
 void drawRightTriangle();
+void drawPrevLeftTriangle();
 double fft();
 double cents_calculate( double, double );
 float algo_riddim( float, int , int , float );
 float base_freq_calc( float , float , int , int );
 int octave_calc(float , float );
+
 void tuning_test( double );
 
 void setup() {
@@ -262,6 +265,14 @@ void drawRightTriangle() {
   display.fillTriangle(230, 120, 210, 140, 210, 100, ST77XX_WHITE);
 }
 
+void drawPrevLeftTriangle() {
+  display.fillTriangle(10, 115, 30, 130, 30, 100, ST77XX_WHITE);
+  display.setCursor(10, 136);
+  display.setTextSize(2);
+  display.setTextColor(ST77XX_WHITE);
+  display.println("Prev");
+}
+
 void drawIntroScreen() {
 
 //   display.drawRGBBitmap(0,0, knight, 240, 240);
@@ -295,37 +306,43 @@ void drawModeSelectionScreen() {
   display.setTextSize(3);
   display.println( "Select Mode" );
 
-// Mode 0: Auto Mode, Goes through all strings
-// Mode 1: Individual String Mode
-// Mode 2: Free Tuning Mode
-  if( mode_selected == 0 ){
-      display.setCursor(20, 40);
-      display.println( "Auto Tuning" );
-  } else if( mode_selected == 1 ){
-      display.setCursor(20, 40);
-      display.println( "Indv. String" );
-  } else if( mode_selected == 2) {
-      display.setCursor(20, 40);
-      display.println( "Free Tuning" );
-  }
+    display.setCursor(20, 40);
+    switch (mode_selected)
+    {
+    case 0: // Mode 0: Auto Mode, Goes through all strings
+        display.println("Auto Tuning");
+        break;
+
+    case 1: // Mode 1: Individual String Mode
+        display.println("Indv. String");
+        break;
+
+    case 2: // Mode 2: Free Tuning Mode
+        display.println("Free Tuning");
+        break;
+    }
 }
 
 // display.String# displays correct number of string in correct order.
 void drawStringSelectionScreen() {
   display.fillScreen(ST77XX_BLACK);
+  if (string_selected == 0)
+    drawPrevLeftTriangle();
   if (string_selected > 0)
     drawLeftTriangle();
   if (string_selected < 5)
     drawRightTriangle();
-  display.setCursor(10, 10);
   display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
   display.setTextSize(3);
+  display.setCursor(0, 10);
   display.println( "Select String" );
-  display.println( "String #" + (String)(string_selected + (6 - ( (string_selected * 2 ))))); 
+  display.println( "String #" + (String)(string_selected + (6 - ( (string_selected * 2 )))) ); 
 }
 
 void drawTuningLibrarySelectionScreen() {
   display.fillScreen(ST77XX_BLACK);
+  if (library_selected == 0)
+    drawPrevLeftTriangle();
   if (library_selected > 0)
     drawLeftTriangle();
   if (library_selected < 9)
@@ -535,55 +552,6 @@ void spinMotorSharp(int time, double freq) {
     analogWrite(PWM_WIRE, 255);
 }
 
-/*
-void print_hertz( float peak ){
-    display.setCursor(60, 120);
-        display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
-        display.setTextSize(3);
-        
-        if( peak < 10 ) {
-            peak = 0.00;
-            display.setTextSize(2);
-            display.setCursor(30, 150);
-            display.println( "Waiting for input" );
-            display.setCursor(60, 120);
-            display.setTextSize(3);
-
-        } else if( peak < 81.5){
-            motor_flag = HIGH;
-            display.print(peak, 2);
-            display.println( "Hz     " );
-            digitalWrite(DIR_WIRE, motor_flag);
-            spinMotorFlat();
-
-        } else if( peak > 83.50 ){
-            motor_flag = LOW;
-            display.print(peak, 2);
-            display.println( "Hz     " );
-            digitalWrite(DIR_WIRE, motor_flag);
-            spinMotorSharp();
-
-        } else {
-            display.setCursor(60, 120);
-            display.print(peak, 2);
-            display.println( "Hz     " );
-            display.setCursor(60, 150);
-            display.println( "tuned-ish" );
-            test_value = 0;
-            tone(BUZZ, 60);
-            delay(10);
-            noTone(BUZZ); 
-            
-        }
-        
-        display.setCursor(60, 120);
-        display.print(peak, 2);
-        display.println( "Hz     " );
-        display.setCursor(10, 10);
-        display.println( "FOR DEMO PURPOSES ONLY" );
-}
-*/
-
 void device_operations() {
   switch( test_value ) {
     case 1: // LEFT
@@ -592,7 +560,6 @@ void device_operations() {
         case 1: // mode selection
           if (mode_selected > 0) {
             mode_selected -= 1;
-            test_value = 0;
             drawScreen();
           }
           break;
@@ -600,7 +567,10 @@ void device_operations() {
         case 2: // string selection
           if (string_selected > 0) {
             string_selected -= 1;
-            test_value = 0;
+            drawScreen();
+          } else {
+            library_selected = 0;
+            screen_value = 3;
             drawScreen();
           }
           break;
@@ -608,7 +578,10 @@ void device_operations() {
         case 3: // tuning library selection
           if (library_selected > 0) {
             library_selected -= 1;
-            test_value = 0;
+            drawScreen();
+          } else {
+            mode_selected = 0;
+            screen_value = 1;
             drawScreen();
           }
           break;
@@ -636,20 +609,17 @@ void device_operations() {
             case 0: // auto tuning
               screen_value = 3;
               library_selected = 0;
-              test_value = 0;
               drawScreen();
               break;
 
             case 1: // individual string tuning
               screen_value = 3;
               library_selected = 0;
-              test_value = 0;
               drawScreen();
               break;
 
             case 2: // free tuning
               screen_value = 4;
-              test_value = 0;
               drawScreen();
               break;
           }
@@ -657,7 +627,6 @@ void device_operations() {
           break;
         case 2: // string selection
           screen_value = 5;
-          test_value = 0;
           drawScreen();
           break;
 
@@ -676,7 +645,6 @@ void device_operations() {
         case 4: // free tuning
           screen_value = 1;
           mode_selected = 0;
-          test_value = 0;
           drawScreen();
           break;
       }
@@ -690,7 +658,6 @@ void device_operations() {
         case 1: // mode selection
           if (mode_selected < 2) {
             mode_selected += 1;
-            test_value = 0;
             drawScreen();
           }
           break;
@@ -698,7 +665,6 @@ void device_operations() {
         case 2: // string selection
           if (string_selected < 5) {
             string_selected += 1;
-            test_value = 0;
             drawScreen();
           }
           break;
@@ -706,7 +672,6 @@ void device_operations() {
         case 3: // tuning library selection
           if (library_selected < 9) {
             library_selected += 1;
-            test_value = 0;
             drawScreen();
           }
           break;
