@@ -332,10 +332,10 @@ void drawTuningLibrarySelectionScreen() {
     drawRightTriangle();
   display.setCursor(10, 10);
   display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
-  display.setTextSize(2);
-  display.println( "Select tuning from library" );
-  
   display.setTextSize(3);
+  display.setCursor(30, 10);
+  display.println( "Pick Tuning" );
+  
   display.setCursor(70, 110);
   display.println( (String)(lib_name[library_selected]) );
 }
