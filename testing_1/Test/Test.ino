@@ -162,6 +162,8 @@ const char *lib_name[12]= {"E Std", "D Std", "Eb Std", "Drop D", "Drop C", "Drop
 const char *note_name[12] = {"G#/Ab", "A", "A#/Bb", "B", "C", "C#/Db", "D", "D#/Eb", 
                                 "E", "F", "F#/Gb", "G"};
 
+const uint16_t rect_colors[9] = {ST77XX_RED, ST77XX_ORANGE, ST77XX_YELLOW, 0x77F0, ST77XX_GREEN, 0x77F0, ST77XX_YELLOW, ST77XX_ORANGE, ST77XX_RED};
+
 int freq_base_A[8] = {432, 434, 436, 438, 440, 442, 444, 446};
 float adjusted_base[12][2] = {0};
 float adjusted_array[12][7] = {0};
@@ -209,6 +211,11 @@ void drawLeftTriangle();
 void drawRightTriangle();
 void drawPrevLeftTriangle();
 void drawRectangles( double );
+void drawFlatSymbol();
+void drawSharpSymbol();
+void drawCenterRectangle( char* );
+void drawTuningScreen();
+void drawSkipRightTriangle();
 double fft();
 double cents_calculate( double, double );
 float algo_riddim( float, int , int , float );
@@ -302,7 +309,15 @@ void drawPrevLeftTriangle() {
   display.setCursor(10, 136);
   display.setTextSize(2);
   display.setTextColor(ST77XX_WHITE);
-  display.println("Prev");
+  display.println("PREV");
+}
+
+void drawSkipRightTriangle() {
+  display.fillTriangle(230, 115, 210, 130, 210, 100, ST77XX_WHITE);
+  display.setCursor(230, 136);
+  display.setTextSize(2);
+  display.setTextColor(ST77XX_WHITE);
+  display.println("SKIP");
 }
 
 // drawRect(top left x, top left y, width, height, color)
@@ -312,8 +327,6 @@ void drawCenterRectangle(char* text) {
     display.setTextSize(2);
     display.print(text);
 }
-
-uint16_t rect_colors[9] = {ST77XX_RED, ST77XX_ORANGE, ST77XX_YELLOW, 0x77F0, ST77XX_GREEN, 0x77F0, ST77XX_YELLOW, ST77XX_ORANGE, ST77XX_RED};
 
 // drawRoundRect(top left x, top left y, width, height, radius, color)
 void drawRectangles(double cents) {
@@ -495,6 +508,8 @@ void drawTuningScreen() {
   display.print("Hz");
 
   drawPrevLeftTriangle();
+  if (mode_selected == 0 && string_selected < 5) // auto tuning
+    drawSkipRightTriangle();
   drawCenterRectangle("TUNE");
 }
 
@@ -770,7 +785,7 @@ void device_operations() {
           drawScreen();
           break;
         
-        case 6: // pluck string
+        case 6: // tuning screen
           screen_value = 5;
           drawScreen();
           break;
@@ -812,6 +827,14 @@ void device_operations() {
           
           digitalWrite(PWM_WIRE, 255);
           break;
+        
+        case 6: // tuning screen
+          if (mode_selected == 0 && string_selected < 5) {
+            string_selected += 1;
+            drawScreen();
+          }
+          break;
+
       }
 
       test_value = 0;
