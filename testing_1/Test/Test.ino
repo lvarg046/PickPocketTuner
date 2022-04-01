@@ -113,10 +113,9 @@ float tuning_array [12][7] = { // Based on A - 440 Standard
 *   Lowest string is thickest string, highest string is thinnest
 *   Order is 6, 5, 4, 3, 2, 1
 */
-
 float premade_tuning_lib [11][6] = { // Based on A - 440 Standard
-    {82.41, 110.00, 146.83, 196.00, 246.94, 329.63},// E - Standard  E-A-D-G-B-E
-    {73.42, 98.00, 130.81, 174.61, 220.00, 293.66}, // D - Standard  D-G-C-F-A-D
+    {tuning_array[8][2], tuning_array[1][3], tuning_array[6][3], tuning_array[11][3], tuning_array[3][4], tuning_array[8][4]},// E - Standard  E-A-D-G-B-E
+    {tuning_array[6][2], tuning_array[11][2], tuning_array[4][3], tuning_array[9][3], tuning_array[1][4], tuning_array[6][4]}, // D - Standard  D-G-C-F-A-D
     {77.78, 103.83, 138.57, 185.00, 233.08, 311.13},// Eb - Standard Eb-Ab-Db-Gb-Bb-Eb
     {73.42, 110.00, 146.83, 196.00, 246.94, 329.63},// Drop D        D-A-D-G-B-E
     {65.41, 98.00, 130.81, 174.61, 220.00, 293.66}, // Drop C        C-G-C-F-A-D
@@ -128,11 +127,40 @@ float premade_tuning_lib [11][6] = { // Based on A - 440 Standard
     {82.41, 123.47, 164.81, 207.65, 246.94, 329.63} // Open E        E-B-E-G#-B-E
 };
 
-const char *lib_name[11]= {"E Std", "D Std", "Eb Std", "Drop D", "Drop C", "Drop A", 
-                            "Open D", "Open G", "Open C", "Open E"};
+// float premade_tuning_lib [11][6] = { // Based on A - 440 Standard
+//     {tuning_array[8][2], tuning_array[1][3], tuning_array[6][3], tuning_array[11][3], tuning_array[3][4], tuning_array[8][4]},// E - Standard  E-A-D-G-B-E
+//     {73.42, 98.00, 130.81, 174.61, 220.00, 293.66}, // D - Standard  D-G-C-F-A-D
+//     {77.78, 103.83, 138.57, 185.00, 233.08, 311.13},// Eb - Standard Eb-Ab-Db-Gb-Bb-Eb
+//     {73.42, 110.00, 146.83, 196.00, 246.94, 329.63},// Drop D        D-A-D-G-B-E
+//     {65.41, 98.00, 130.81, 174.61, 220.00, 293.66}, // Drop C        C-G-C-F-A-D
+//     {61.74, 92.50, 123.47, 164.81, 207.65, 277.18}, // Drop B        B-Gb-B-E-Ab-Db
+//     {55.00, 82.51, 110.00, 146.83, 185.00, 246.94}, // Drop A        A-E-A-D-F#-B
+//     {77.78, 110.00, 146.83, 186.00, 220.00, 293.66},// Open D        D-A-D-F#-A-D
+//     {77.78, 98.00, 146.83, 196.00, 246.94, 293.66}, // Open G        D-G-D-G-B-D
+//     {65.41, 98.00, 130.81, 196.00, 261.63, 329.63}, // Open C        C-G-C-G-C-E
+//     {82.41, 123.47, 164.81, 207.65, 246.94, 329.63} // Open E        E-B-E-G#-B-E
+// };
+
+
+const char* premade_tuning_lib_letter [11][6] = {
+  {"E", "A", "D", "G", "B", "E"},       // E - Standard  E-A-D-G-B-E
+  {"D", "G", "C", "F", "A", "D"},       // D - Standard  D-G-C-F-A-D
+  {"Eb", "Ab", "Db", "Gb", "Bb", "Eb"}, // Eb - Standard Eb-Ab-Db-Gb-Bb-Eb
+  {"D", "A", "D", "G", "B", "E"},       // Drop D        D-A-D-G-B-E
+  {"C", "G", "C", "F", "A", "D"},       // Drop C        C-G-C-F-A-D
+  {"B", "Gb", "B", "E", "Ab", "Db"},    // Drop B        B-Gb-B-E-Ab-Db
+  {"A", "E", "A", "D", "F#", "B"},      // Drop A        A-E-A-D-F#-B
+  {"D", "A", "D", "F#", "A", "D"},      // Open D        D-A-D-F#-A-D
+  {"D", "G", "D", "G", "B", "D"},       // Open G        D-G-D-G-B-D
+  {"C", "G", "C", "G", "C", "E"},       // Open C        C-G-C-G-C-E
+  {"E", "B", "E", "G#", "B", "E"}       // Open E        E-B-E-G#-B-E
+};
+
+const char *lib_name[12]= {"E Std", "D Std", "Eb Std", "Drop D", "Drop C", "Drop B", "Drop A", 
+                                "Open D", "Open G", "Open C", "Open E"};
                             
 const char *note_name[12] = {"G#/Ab", "A", "A#/Bb", "B", "C", "C#/Db", "D", "D#/Eb", 
-                            "E", "F", "F#/Gb", "G"};
+                                "E", "F", "F#/Gb", "G"};
 
 int freq_base_A[8] = {432, 434, 436, 438, 440, 442, 444, 446};
 float adjusted_base[12][2] = {0};
@@ -180,13 +208,14 @@ void drawPluckStringScreen();
 void drawLeftTriangle();
 void drawRightTriangle();
 void drawPrevLeftTriangle();
+void drawRectangles( double );
 double fft();
 double cents_calculate( double, double );
 float algo_riddim( float, int , int , float );
 float base_freq_calc( float , float , int , int );
 int octave_calc(float , float );
 
-void tuning_test( double );
+unsigned long tuning_test( double );
 
 void setup() {
   Serial.begin(115200);
@@ -253,6 +282,9 @@ void drawScreen() {
     case 5:
       drawPluckStringScreen();
       break;
+    case 6:
+      drawTuningScreen();
+      break;
   }
 }
 
@@ -271,6 +303,52 @@ void drawPrevLeftTriangle() {
   display.setTextSize(2);
   display.setTextColor(ST77XX_WHITE);
   display.println("Prev");
+}
+
+// drawRect(top left x, top left y, width, height, color)
+void drawCenterRectangle(char* text) {
+    display.drawRect(80, 100, 80, 40, ST77XX_WHITE);
+    display.setCursor(98, 113);
+    display.setTextSize(2);
+    display.print(text);
+}
+
+uint16_t rect_colors[9] = {ST77XX_RED, ST77XX_ORANGE, ST77XX_YELLOW, 0x77F0, ST77XX_GREEN, 0x77F0, ST77XX_YELLOW, ST77XX_ORANGE, ST77XX_RED};
+
+// drawRoundRect(top left x, top left y, width, height, radius, color)
+void drawRectangles(double cents) {
+  // rectangle width : 20
+  // gap between rectangles : 4
+  // gap from screen edge: 14
+  int cursorx = 14;
+  int cursory = 195;
+  double cent_box_values[9] = {135, 102, 72, 36, 3, -30, -63, -96, -129};
+  
+  drawFlatSymbol();
+  drawSharpSymbol();
+
+  for (int i = 0; i < 9; i++) {
+    uint16_t curr_color = rect_colors[i];
+    if (cents > cent_box_values[i])
+      curr_color = ST77XX_BLACK;
+    if (cents < -3 && i == 5)
+      curr_color = rect_colors[i];
+    display.setCursor(cursorx, cursory);
+    display.fillRoundRect(cursorx, cursory, 20, 40, 1, curr_color);
+    cursorx += 24;
+  }
+}
+
+void drawFlatSymbol() {
+  display.setCursor(43, 160);
+  display.setTextSize(3);
+  display.print("b");
+}
+
+void drawSharpSymbol() {
+  display.setCursor(185, 160);
+  display.setTextSize(3);
+  display.print("#");
 }
 
 void drawIntroScreen() {
@@ -307,17 +385,16 @@ void drawModeSelectionScreen() {
   display.println( "Select Mode" );
 
     display.setCursor(20, 40);
-    switch (mode_selected)
-    {
-    case 0: // Mode 0: Auto Mode, Goes through all strings
+    switch (mode_selected) {
+      case 0: // Mode 0: Auto Mode, Goes through all strings
         display.println("Auto Tuning");
         break;
 
-    case 1: // Mode 1: Individual String Mode
+      case 1: // Mode 1: Individual String Mode
         display.println("Indv. String");
         break;
 
-    case 2: // Mode 2: Free Tuning Mode
+      case 2: // Mode 2: Free Tuning Mode
         display.println("Free Tuning");
         break;
     }
@@ -345,7 +422,7 @@ void drawTuningLibrarySelectionScreen() {
     drawPrevLeftTriangle();
   if (library_selected > 0)
     drawLeftTriangle();
-  if (library_selected < 9)
+  if (library_selected < 10)
     drawRightTriangle();
   display.setCursor(10, 10);
   display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
@@ -366,21 +443,59 @@ void drawPluckStringScreen() {
 
   // fft
   delay(500);
+  unsigned long myTime;
   double peak = fft();
-  tuning_test(peak);
+  myTime = tuning_test(peak);
+  display.println("TIME: "+(String)(myTime));
+  delay(5000);
   // spin the motor based off of fft reading
   // if auto mode, go to next string
   // else go back to mode selection
-
+    
   //delay(1000);
   if (mode_selected == 0 && string_selected < 5) {
     string_selected += 1;
-    drawPluckStringScreen();
+    // add "move to next string" screen
+    drawScreen();
   } else {
     screen_value = 3;
     library_selected = 0;
-    drawTuningLibrarySelectionScreen();
+    drawScreen();
   }
+}
+
+void drawTuningScreen() {
+  display.fillScreen(ST77XX_BLACK);
+  display.setTextSize(4);
+
+  if (strlen(premade_tuning_lib_letter[library_selected][string_selected]) > 1) {
+    display.setCursor(102, 10);
+  } else {
+    display.setCursor(113, 10);
+  }
+
+  display.print(premade_tuning_lib_letter[library_selected][string_selected]);
+
+  display.setCursor(10, 10);
+  display.setTextSize(2);
+  display.print("Input");
+
+  display.setCursor(165, 10);
+  display.print("Target");
+
+  if (premade_tuning_lib[library_selected][string_selected] > 100) {
+    display.setCursor(160, 30);
+  } else {
+    display.setCursor(180, 30);
+  }
+
+  display.setTextSize(2);
+  display.print(premade_tuning_lib[library_selected][string_selected]);
+  display.setCursor(180, 50);
+  display.print("Hz");
+
+  drawPrevLeftTriangle();
+  drawCenterRectangle("TUNE");
 }
 
 void drawFreeTuneScreen() {
@@ -391,6 +506,8 @@ void drawFreeTuneScreen() {
   display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
   display.setTextSize(3);
   display.println( "Free Mode" );
+  drawCenterRectangle("DONE");
+  drawRectangles(-6.0);
 }
 
 void readWifiConf() {
@@ -595,6 +712,12 @@ void device_operations() {
           
           digitalWrite(PWM_WIRE, 255);
           break;
+        
+        case 6: // tuning screen
+          screen_value = 2;
+          string_selected = 0;
+          drawScreen();
+          break;
       }
 
       test_value = 0;
@@ -626,12 +749,11 @@ void device_operations() {
 
           break;
         case 2: // string selection
-          screen_value = 5;
+          screen_value = 6;
           drawScreen();
           break;
 
         case 3: // library selection
-          test_value = 0;
           if (mode_selected == 1) {
             screen_value = 2;
             string_selected = 0;
@@ -645,6 +767,11 @@ void device_operations() {
         case 4: // free tuning
           screen_value = 1;
           mode_selected = 0;
+          drawScreen();
+          break;
+        
+        case 6: // pluck string
+          screen_value = 5;
           drawScreen();
           break;
       }
@@ -670,7 +797,7 @@ void device_operations() {
           break;
 
         case 3: // tuning library selection
-          if (library_selected < 9) {
+          if (library_selected < 10) {
             library_selected += 1;
             drawScreen();
           }
@@ -782,10 +909,10 @@ float algo_riddim(float input_fr, int std_fr_in, int std_fr_out, float table_440
 }
 
 // Calculating octaves above/below base_freq
-int octave_calc( float base_freq, float input_freq ){
-    int octave_out;
-    float freq = base_freq/input_freq;
-    octave_out = (log2f(freq)) + 0.5;
+double octave_calc( float base_freq, float input_freq ){
+    double octave_out;
+    double freq = base_freq/input_freq;
+    octave_out = (log2f(freq));
     return octave_out;
 }
 
@@ -814,41 +941,148 @@ double cents_calculate( double input_freq, double ref_freq){
     return cents;
 }
 
-void tuning_test( double input_freq ){
-  double  target_freq = premade_tuning_lib[library_selected][string_selected]; // From premade_tuning_lib array
+unsigned long tuning_test( double input_freq ){
+  double target_freq = premade_tuning_lib[library_selected][string_selected]; // From premade_tuning_lib array
   display.println(target_freq, 2);
   double current_cents;
   double freq_diff; 
+  double calc_freq;
+  double octave;
+  double octave2;
   double current_freq = input_freq;
-
+  unsigned long time1 = millis();
   current_cents = cents_calculate( current_freq, target_freq );
 
-  while( current_cents > 1.5  || current_cents < -1.5){
-    freq_diff = current_freq - target_freq;
-    current_freq = fft();
-    current_cents = cents_calculate( current_freq, target_freq );
-    // 75ms for 5 cents, 35ms for 3 cents, 15ms for less than 3 cents
-    if( current_cents >= 5 || current_cents <= -5){
-      if( freq_diff < 0 ){  
-        spinMotorSharp(75, current_freq);
-      } else if( freq_diff > 0 ){
-        spinMotorFlat(75, current_freq);  
+  while( current_cents > 1.0 || current_cents < -1.0){
+      current_freq = fft();
+      
+      octave = octave_calc(target_freq, current_freq); // Calculates octave offset based on current input
+      if( octave < 0 ){ // Negative octave means higher pitch
+          octave2 = fabs(octave);
+          octave2 = -round(octave2);
+          octave = octave2;
+      } else { // Positive octave means lower pitch
+          octave2 = round(octave);
+          octave = octave2;
       }
-    } else if( (current_cents >= 3 && current_cents < 5) || (current_cents <= -3 && current_cents > 5) ){
-      if( freq_diff < 0 ){
-        spinMotorSharp(35, current_freq);
-      } else if ( freq_diff > 0 ){
-        spinMotorFlat(35, current_freq);
+      // Calculates current frequency by either dividing or multiplying by the 2^octave
+      current_freq = current_freq * pow(2, octave);  
+      freq_diff = current_freq - target_freq;
+      current_cents = cents_calculate( current_freq, target_freq);
+
+      if( current_freq < 60 ){
+          ;;
+      } else {
+          if( current_cents >= 5 || current_cents <= -5 ){
+              if( freq_diff < 0 ){
+                  spinMotorSharp(75, current_freq);
+              } else {
+                  spinMotorFlat(75, current_freq);
+              }
+          } else if( (current_cents < 5 && current_cents >= 3) || 
+                     ( current_cents <= -3 && current_cents >= -5) ){
+                if( freq_diff < 0 ){
+                    spinMotorSharp(25, current_freq);
+                } else {
+                    spinMotorFlat(25, current_freq);
+                }
+          } else {
+              if( freq_diff < 0 ){
+                  spinMotorSharp(10, current_freq);
+              } else {
+                  spinMotorFlat(10, current_freq);
+              }
+          }
       }
-    } else {
-      if( freq_diff < 0){
-        spinMotorSharp(15, current_freq);
-      } else if ( freq_diff > 0 ){
-        spinMotorFlat(15, current_freq);
-      }
-    }
-  }
+  }   
+
+//   while( current_cents > 1.5  || current_cents < -1.5){
+//     freq_diff = current_freq - target_freq;
+//     current_freq = fft();
+//     current_cents = cents_calculate( current_freq, target_freq );
+
+//     // if( test_diff < 1 && freq_diff < ){
+//     //     current_freq = current_freq/2;
+//     // } else if( test_diff > 1){
+//     //     current_freq = current_freq*2
+//     // }
+//     // C15 = input/current, F16 = Test_diff, G16 = test_diff2, x
+//     // if(current_freq >= (test_diff-10) && current_freq <= (test_diff +10 )
+//     //  { current_freq = current_freq / 2 }
+//     //      else if( current_freq >= (test_diff2 - 10) AND current_freq <= (test_diff2 +10 )
+//     //    { current_freq = current_freq * 2 }
+//     //      else { current_freq = fft(); }
+//     // Then do the work?
+//     test_diff = octave_calc(target_freq, current_freq);
+//     if( test_diff < 0){
+//         test_diff2 = fabs(test_diff);
+//         test_diff2 = -round(test_diff);
+//         test_diff = test_diff2;
+//     }
+//     current_freq = current_freq * pow(2, test_diff);
+
+//     =IF(C31>=0, C15*(2^(ROUND(C31,0))), C15*(2^(ROUND(C31,0))))
+
+//     if( current_freq >= ( test_diff - 10) ){
+//         current_freq = current_freq/2;
+//         current_cents = cents_calculate( current_freq, target_freq);
+//         if( current_freq < 63 ){
+//             ;;
+//         } else {
+//         // 75ms for 5 cents, 35ms for 3 cents, 15ms for less than 3 cent
+//         if( current_cents >= 5 || current_cents <= -5){
+//             if( freq_diff < 0 ){  
+//                 spinMotorSharp(75, current_freq);
+//             } else if( freq_diff > 0 ){
+//                 spinMotorFlat(75, current_freq);  
+//             }
+//         } else if( (current_cents >= 3 && current_cents < 5) || (current_cents <= -3 && current_cents > -5) ){
+//             if( freq_diff < 0 ){
+//                 spinMotorSharp(25, current_freq);
+//             } else if ( freq_diff > 0 ){
+//                 spinMotorFlat(25, current_freq);
+//             }
+//         } else {
+//             if( freq_diff < 0){
+//                 spinMotorSharp(10, current_freq);
+//             } else if ( freq_diff > 0 ){
+//                 spinMotorFlat(10, current_freq);
+//             }
+//         }
+//     }
+//     } else {
+//         if( current_freq < 63 ){
+//             ;;
+//         } else {
+//         // 75ms for 5 cents, 35ms for 3 cents, 15ms for less than 3 cent
+//         if( current_cents >= 5 || current_cents <= -5){
+//             if( freq_diff < 0 ){  
+//                 spinMotorSharp(75, current_freq);
+//             } else if( freq_diff > 0 ){
+//                 spinMotorFlat(75, current_freq);  
+//             }
+//         } else if( (current_cents >= 3 && current_cents < 5) || (current_cents <= -3 && current_cents > 5) ){
+//             if( freq_diff < 0 ){
+//                 spinMotorSharp(25, current_freq);
+//             } else if ( freq_diff > 0 ){
+//                 spinMotorFlat(25, current_freq);
+//             }
+//         } else {
+//             if( freq_diff < 0){
+//                 spinMotorSharp(10, current_freq);
+//             } else if ( freq_diff > 0 ){
+//                 spinMotorFlat(10, current_freq);
+//             }
+//         }
+//     }
+//     }
+//   }
+  time1 = millis() - time1;
   tone(BUZZ, 60);
-  delay(50);
+  delay(65);
   noTone(BUZZ);
+  display.setTextSize(2);
+  display.println("Move to next string");
+  delay(2000);
+  return time1;
 }
