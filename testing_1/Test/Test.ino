@@ -476,6 +476,7 @@ void drawPluckStringScreen() {
   if (mode_selected == 0 && string_selected < 5) {
     string_selected += 1;
     // add "move to next string" screen
+    screen_value = 6;
     drawScreen();
   } else {
     screen_value = 3;
