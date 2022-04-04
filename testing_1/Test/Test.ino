@@ -328,8 +328,12 @@ void drawCenterRectangle(char* text) {
     display.print(text);
 }
 
+void eraseCenterRectangle() {
+  display.fillRect(80, 100, 80, 40, ST77XX_BLACK);
+}
+
 // drawRoundRect(top left x, top left y, width, height, radius, color)
-void drawRectangles(double cents) {
+void drawRectangles(double cents, double inputFreq) {
   // rectangle width : 20
   // gap between rectangles : 4
   // gap from screen edge: 14
@@ -339,6 +343,12 @@ void drawRectangles(double cents) {
   
   drawFlatSymbol();
   drawSharpSymbol();
+
+  display.setCursor(10, 30);
+  display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+  display.setTextSize(2);
+  display.print(inputFreq);
+  display.print("Hz   ");
 
   for (int i = 0; i < 9; i++) {
     uint16_t curr_color = rect_colors[i];
@@ -448,22 +458,19 @@ void drawTuningLibrarySelectionScreen() {
 }
 
 void drawPluckStringScreen() {
-  display.fillScreen(ST77XX_BLACK);
-  display.setCursor(10, 10);
-  display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
-  display.setTextSize(3);
-  display.println( "Pluck String " + (String)(string_selected + (6 - ((string_selected * 2)))) );
-
+  eraseCenterRectangle();
   // fft
   delay(500);
   unsigned long myTime;
   double peak = fft();
   myTime = tuning_test(peak);
+  display.setCursor(98, 113);
+  display.setTextSize(2);
   display.println("TIME: "+(String)(myTime));
   delay(5000);
   // spin the motor based off of fft reading
   // if auto mode, go to next string
-  // else go back to mode selection
+  // else go back to library selection
     
   //delay(1000);
   if (mode_selected == 0 && string_selected < 5) {
@@ -992,6 +999,8 @@ unsigned long tuning_test( double input_freq ){
       current_freq = current_freq * pow(2, octave);  
       freq_diff = current_freq - target_freq;
       current_cents = cents_calculate( current_freq, target_freq);
+
+      drawCenterRectangle(current_cents, current_freq);
 
       if( current_freq < 60 ){
           ;;
