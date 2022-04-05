@@ -335,6 +335,15 @@ void eraseCenterRectangle() {
 // drawRoundRect(top left x, top left y, width, height, radius, color)
 void drawRectangles(double cents, double inputFreq) {
   display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+  display.setTextSize(4);
+
+  if (strlen(premade_tuning_lib_letter[library_selected][string_selected]) > 1) {
+    display.setCursor(102, 10);
+  } else {
+    display.setCursor(113, 10);
+  }
+
+  display.print(premade_tuning_lib_letter[library_selected][string_selected]);
   // rectangle width : 20
   // gap between rectangles : 4
   // gap from screen edge: 14
@@ -675,8 +684,6 @@ double fft() {
 void spinMotorFlat(int time, double freq) {
     motor_flag = LOW;
     digitalWrite(DIR_WIRE, motor_flag);
-    display.setCursor(60, 150);
-    display.println(freq, 2);
     analogWrite(PWM_WIRE, 0);
     delay(time);
     analogWrite(PWM_WIRE, 255);
@@ -685,8 +692,6 @@ void spinMotorFlat(int time, double freq) {
 void spinMotorSharp(int time, double freq) {
     motor_flag = HIGH;
     digitalWrite(DIR_WIRE, motor_flag);
-    display.setCursor(60, 150);
-    display.println(freq, 2);
     analogWrite(PWM_WIRE, 0);
     delay(time);
     analogWrite(PWM_WIRE, 255);
@@ -735,6 +740,12 @@ void device_operations() {
           
           digitalWrite(PWM_WIRE, 255);
           break;
+
+        case 5: // pluck string screen
+          screen_value = 2;
+          string_selected = 0;
+          drawScreen();
+          break;
         
         case 6: // tuning screen
           screen_value = 2;
@@ -782,7 +793,7 @@ void device_operations() {
             string_selected = 0;
             drawScreen();
           } else {
-            screen_value = 5;
+            screen_value = 6;
             drawScreen();
           }
           break;
@@ -974,7 +985,6 @@ double cents_calculate( double input_freq, double ref_freq){
 
 unsigned long tuning_test( double input_freq ){
   double target_freq = premade_tuning_lib[library_selected][string_selected]; // From premade_tuning_lib array
-  display.println(target_freq, 2);
   double current_cents;
   double freq_diff; 
   double calc_freq;
@@ -1003,6 +1013,8 @@ unsigned long tuning_test( double input_freq ){
       current_freq = current_freq * pow(2, octave);  
       freq_diff = current_freq - target_freq;
       current_cents = cents_calculate( current_freq, target_freq);
+
+      drawRectangles(current_cents, current_freq);
 
       if( current_freq < 60 ){
           ;;
@@ -1047,8 +1059,6 @@ unsigned long tuning_test( double input_freq ){
   tone(BUZZ, 60);
   delay(65);
   noTone(BUZZ);
-  display.setTextSize(2);
-  display.println("Move to next string");
   delay(2000);
   return time1;
 }
