@@ -530,7 +530,7 @@ void drawFreeTuneScreen() {
   display.setTextSize(3);
   display.println( "Free Mode" );
   drawCenterRectangle("DONE");
-  drawRectangles(-6.0);
+
 }
 
 void readWifiConf() {
