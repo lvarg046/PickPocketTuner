@@ -220,7 +220,7 @@ double fft();
 double cents_calculate( double, double );
 float algo_riddim( float, int , int , float );
 float base_freq_calc( float , float , int , int );
-int octave_calc(float , float );
+double octave_calc(float , float );
 
 unsigned long tuning_test( double );
 
@@ -987,7 +987,10 @@ unsigned long tuning_test( double input_freq ){
   while( current_cents > 1.0 || current_cents < -1.0){
       current_freq = fft();
       
-      octave = octave_calc(target_freq, current_freq); // Calculates octave offset based on current input
+      if( current_freq < 63 ){
+         ;;
+      } else {
+          octave = octave_calc(target_freq, current_freq); // Calculates octave offset based on current input
       if( octave < 0 ){ // Negative octave means higher pitch
           octave2 = fabs(octave);
           octave2 = -round(octave2);
@@ -1001,115 +1004,45 @@ unsigned long tuning_test( double input_freq ){
       freq_diff = current_freq - target_freq;
       current_cents = cents_calculate( current_freq, target_freq);
 
-      drawRectangles(current_cents, current_freq);
-
       if( current_freq < 60 ){
           ;;
       } else {
-          if( current_cents >= 5 || current_cents <= -5 ){
-              if( freq_diff < 0 ){
+          if( (current_cents > 30 ) || (current_cents < -30) ) 
+          {
+              if( freq_diff < 0){
+                  spinMotorSharp(200, current_freq );
+              } else{
+                  spinMotorFlat(200, current_freq);
+              }
+          } else if( (current_cents> 10 && current_cents <= 30) || ( current_cents <-10 && current_cents >= -30) ) {
+              if( freq_diff <0 ){
                   spinMotorSharp(75, current_freq);
               } else {
                   spinMotorFlat(75, current_freq);
               }
+          } else if( (current_cents <= 10 && current_cents >=5)  || (current_cents <= -5 && current_cents >= 10) ){
+              if( freq_diff < 0 ){
+                  spinMotorSharp(50, current_freq);
+              } else {
+                  spinMotorFlat(50, current_freq);
+              }
           } else if( (current_cents < 5 && current_cents >= 3) || 
                      ( current_cents <= -3 && current_cents >= -5) ){
                 if( freq_diff < 0 ){
-                    spinMotorSharp(25, current_freq);
+                    spinMotorSharp(35, current_freq);
                 } else {
-                    spinMotorFlat(25, current_freq);
+                    spinMotorFlat(35, current_freq);
                 }
           } else {
               if( freq_diff < 0 ){
-                  spinMotorSharp(10, current_freq);
+                  spinMotorSharp(20, current_freq);
               } else {
-                  spinMotorFlat(10, current_freq);
+                  spinMotorFlat(20, current_freq);
               }
           }
       }
+      }
   }   
-
-//   while( current_cents > 1.5  || current_cents < -1.5){
-//     freq_diff = current_freq - target_freq;
-//     current_freq = fft();
-//     current_cents = cents_calculate( current_freq, target_freq );
-
-//     // if( test_diff < 1 && freq_diff < ){
-//     //     current_freq = current_freq/2;
-//     // } else if( test_diff > 1){
-//     //     current_freq = current_freq*2
-//     // }
-//     // C15 = input/current, F16 = Test_diff, G16 = test_diff2, x
-//     // if(current_freq >= (test_diff-10) && current_freq <= (test_diff +10 )
-//     //  { current_freq = current_freq / 2 }
-//     //      else if( current_freq >= (test_diff2 - 10) AND current_freq <= (test_diff2 +10 )
-//     //    { current_freq = current_freq * 2 }
-//     //      else { current_freq = fft(); }
-//     // Then do the work?
-//     test_diff = octave_calc(target_freq, current_freq);
-//     if( test_diff < 0){
-//         test_diff2 = fabs(test_diff);
-//         test_diff2 = -round(test_diff);
-//         test_diff = test_diff2;
-//     }
-//     current_freq = current_freq * pow(2, test_diff);
-
-//     =IF(C31>=0, C15*(2^(ROUND(C31,0))), C15*(2^(ROUND(C31,0))))
-
-//     if( current_freq >= ( test_diff - 10) ){
-//         current_freq = current_freq/2;
-//         current_cents = cents_calculate( current_freq, target_freq);
-//         if( current_freq < 63 ){
-//             ;;
-//         } else {
-//         // 75ms for 5 cents, 35ms for 3 cents, 15ms for less than 3 cent
-//         if( current_cents >= 5 || current_cents <= -5){
-//             if( freq_diff < 0 ){  
-//                 spinMotorSharp(75, current_freq);
-//             } else if( freq_diff > 0 ){
-//                 spinMotorFlat(75, current_freq);  
-//             }
-//         } else if( (current_cents >= 3 && current_cents < 5) || (current_cents <= -3 && current_cents > -5) ){
-//             if( freq_diff < 0 ){
-//                 spinMotorSharp(25, current_freq);
-//             } else if ( freq_diff > 0 ){
-//                 spinMotorFlat(25, current_freq);
-//             }
-//         } else {
-//             if( freq_diff < 0){
-//                 spinMotorSharp(10, current_freq);
-//             } else if ( freq_diff > 0 ){
-//                 spinMotorFlat(10, current_freq);
-//             }
-//         }
-//     }
-//     } else {
-//         if( current_freq < 63 ){
-//             ;;
-//         } else {
-//         // 75ms for 5 cents, 35ms for 3 cents, 15ms for less than 3 cent
-//         if( current_cents >= 5 || current_cents <= -5){
-//             if( freq_diff < 0 ){  
-//                 spinMotorSharp(75, current_freq);
-//             } else if( freq_diff > 0 ){
-//                 spinMotorFlat(75, current_freq);  
-//             }
-//         } else if( (current_cents >= 3 && current_cents < 5) || (current_cents <= -3 && current_cents > 5) ){
-//             if( freq_diff < 0 ){
-//                 spinMotorSharp(25, current_freq);
-//             } else if ( freq_diff > 0 ){
-//                 spinMotorFlat(25, current_freq);
-//             }
-//         } else {
-//             if( freq_diff < 0){
-//                 spinMotorSharp(10, current_freq);
-//             } else if ( freq_diff > 0 ){
-//                 spinMotorFlat(10, current_freq);
-//             }
-//         }
-//     }
-//     }
-//   }
   time1 = millis() - time1;
   tone(BUZZ, 60);
   delay(65);
