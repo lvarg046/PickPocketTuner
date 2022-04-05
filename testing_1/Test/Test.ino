@@ -64,6 +64,11 @@ ESP8266WebServer server(80);
 
 // Removed Knight Image bitmap for readability
 
+// function headers
+void ICACHE_RAM_ATTR button_left_pressed();
+void ICACHE_RAM_ATTR button_center_pressed();
+void ICACHE_RAM_ATTR button_right_pressed();
+
 /* GLOBAL VARIABLES */
 int motor_speed;
 bool motor_flag;
@@ -181,48 +186,6 @@ int i_test;
 
 // display object creation
 Adafruit_ST7789 display = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
-
-// function headers
-void initialize_buttons();
-void ICACHE_RAM_ATTR button_right_pressed();
-void ICACHE_RAM_ATTR button_center_pressed();
-void ICACHE_RAM_ATTR button_left_pressed();
-void button_operations();
-void device_operations();
-void draw_test_circle();
-void spinMotorSharp( int, double );
-void spinMotorFlat( int, double );
-void spinMotor();
-void print_hertz( float );
-void readWifiConf();
-void writeWifiConf();
-bool connectToWifi();
-void setUpAccessPoint();
-void setUpWebServer();
-void handleWebServerRequest();
-void setUpOverTheAirProgramming();
-void drawIntroScreen();
-void drawStringSelectionScreen();
-void drawModeSelectionScreen();
-void drawTuningLibrarySelectionScreen();
-void drawFreeTuneScreen();
-void drawPluckStringScreen();
-void drawLeftTriangle();
-void drawRightTriangle();
-void drawPrevLeftTriangle();
-void drawRectangles( double, double );
-void drawFlatSymbol();
-void drawSharpSymbol();
-void drawCenterRectangle( char* );
-void drawTuningScreen();
-void drawSkipRightTriangle();
-double fft();
-double cents_calculate( double, double );
-float algo_riddim( float, int , int , float );
-float base_freq_calc( float , float , int , int );
-double octave_calc(float , float );
-
-unsigned long tuning_test( double );
 
 void setup() {
   Serial.begin(115200);
@@ -346,7 +309,7 @@ void drawRectangles(double cents, double inputFreq) {
   // gap between rectangles : 4
   // gap from screen edge: 14
   int cursorx = 14;
-  int cursory = 195;
+  int cursory = 175;
   double cent_box_values[9] = {135, 102, 72, 36, 3, -30, -63, -96, -129};
   
   drawFlatSymbol();
@@ -355,7 +318,7 @@ void drawRectangles(double cents, double inputFreq) {
   display.setCursor(10, 30);
   display.setTextSize(2);
   display.print(inputFreq);
-  display.setCursor(13, 50);
+  display.setCursor(23, 50);
   display.print("Hz");
 
   for (int i = 0; i < 9; i++) {
@@ -365,7 +328,7 @@ void drawRectangles(double cents, double inputFreq) {
     if (cents < -3 && i == 5)
       curr_color = rect_colors[i];
     display.setCursor(cursorx, cursory);
-    display.fillRoundRect(cursorx, cursory, 20, 40, 1, curr_color);
+    display.fillRoundRect(cursorx, cursory, 20, 60, 1, curr_color);
     cursorx += 24;
   }
   
@@ -381,13 +344,13 @@ void drawRectangles(double cents, double inputFreq) {
 }
 
 void drawFlatSymbol() {
-  display.setCursor(43, 160);
+  display.setCursor(43, 140);
   display.setTextSize(3);
   display.print("b");
 }
 
 void drawSharpSymbol() {
-  display.setCursor(185, 160);
+  display.setCursor(185, 140);
   display.setTextSize(3);
   display.print("#");
 }
@@ -508,8 +471,8 @@ void drawPluckStringScreen() {
     screen_value = 6;
     drawScreen();
   } else {
-    screen_value = 3;
-    library_selected = 0;
+    screen_value = 2;
+    string_selected = 0;
     drawScreen();
   }
 }
@@ -544,7 +507,7 @@ void drawTuningScreen() {
   display.setCursor(183, 50);
   display.print("Hz");
 
-  if (string_selected == 0) {
+  if (string_selected == 0 || mode_selected == 1) {
     drawPrevLeftTriangle();
   } else {
     drawLeftTriangle();
@@ -773,11 +736,21 @@ void device_operations() {
         
         case 6: // tuning screen
           if (string_selected == 0) {
-            screen_value = 2;
-            string_selected = 0;
+            if (mode_selected == 1) { // indiv string
+              screen_value = 2;
+              string_selected = 0;
+            } else {
+              screen_value = 3;
+              library_selected = 0;
+            }
             drawScreen();
           } else {
-            string_selected -= 1;
+            if (mode_selected == 1) { // indiv string
+              screen_value = 2;
+              string_selected = 0;
+            } else {
+              string_selected -= 1;
+            }
             drawScreen();
           }
           break;
@@ -1023,21 +996,14 @@ unsigned long tuning_test( double input_freq ){
   unsigned long time1 = millis();
   current_cents = cents_calculate( current_freq, target_freq );
 
-  while( current_cents > 1.0 || current_cents < -1.0 ){
+  while( current_cents > 1.25 || current_cents < -1.25 ){
       current_freq = fft();
       
       if( current_freq < 63 ){
          ;;
       } else {
           octave = octave_calc(target_freq, current_freq); // Calculates octave offset based on current input
-      if( octave < 0 ){ // Negative octave means higher pitch
-          octave2 = fabs(octave);
-          octave2 = -round(octave2);
-          octave = octave2;
-      } else { // Positive octave means lower pitch
-          octave2 = round(octave);
-          octave = octave2;
-      }
+          octave = round(octave);
       // Calculates current frequency by either dividing or multiplying by the 2^octave
       current_freq = current_freq * pow(2, octave);  
       freq_diff = current_freq - target_freq;
@@ -1048,43 +1014,43 @@ unsigned long tuning_test( double input_freq ){
       if( current_freq < 60 ){ 
           ;; // no spin >:( 
       } else {
-          if( (current_cents >= 50 ) || (current_cents <= -50) ) 
+          if( (current_cents >= 60 ) || (current_cents <= -60) ) 
           {
               if( freq_diff < 0){
-                  spinMotorSharp(200, current_freq );
+                  spinMotorSharp(225, current_freq );
               } else{
-                  spinMotorFlat(200, current_freq);
+                  spinMotorFlat(125, current_freq);
               }
-          } else if( (current_cents < 50 && current_cents >= 30) || ( current_cents <= -30 && current_cents > -50) ){
+          } else if( (current_cents < 60 && current_cents >= 30) || ( current_cents <= -30 && current_cents > -60) ){
               if( freq_diff < 0 ){
                   spinMotorSharp(100, current_freq);
               } else{
-                  spinMotorFlat(100, current_freq);
+                  spinMotorFlat(60, current_freq);
               }
 
-          }else if( (current_cents < 30 && current_cents >= 10) || ( current_cents <= -10 && current_cents > -30) ) {
+          }else if( (current_cents < 30 && current_cents >= 15) || ( current_cents <= -15 && current_cents > -30) ) {
               if( freq_diff < 0 ){
                   spinMotorSharp(75, current_freq);
               } else {
-                  spinMotorFlat(75, current_freq);
+                  spinMotorFlat(40, current_freq);
               }
-          } else if( (current_cents < 10 && current_cents >= 5)  || (current_cents <= -5 && current_cents > -10) ){
+          } else if( (current_cents < 15 && current_cents >= 7.5)  || (current_cents <= -7.5 && current_cents > -15) ){
               if( freq_diff < 0 ){
                   spinMotorSharp(50, current_freq);
               } else {
-                  spinMotorFlat(50, current_freq);
+                  spinMotorFlat(25, current_freq);
               }
-          } else if( (current_cents < 5 && current_cents >= 3) || ( current_cents <= -3 && current_cents > -5) ){
+          } else if( (current_cents < 7.5 && current_cents >= 3.75) || ( current_cents <= -3.75 && current_cents > -7.5) ){
                 if( freq_diff < 0 ){
                     spinMotorSharp(30, current_freq);
                 } else {
-                    spinMotorFlat(30, current_freq);
+                    spinMotorFlat(20, current_freq);
                 }
-          } else if( current_cents < 3 && current_cents > -3  ){
+          } else if( current_cents < 3.75 && current_cents > -3.75  ){
               if( freq_diff < 0 ){
                   spinMotorSharp(20, current_freq);
               } else {
-                  spinMotorFlat(20, current_freq);
+                  spinMotorFlat(15, current_freq);
               }
           } 
       }
