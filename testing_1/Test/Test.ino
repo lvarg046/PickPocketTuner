@@ -210,7 +210,7 @@ void drawPluckStringScreen();
 void drawLeftTriangle();
 void drawRightTriangle();
 void drawPrevLeftTriangle();
-void drawRectangles( double );
+void drawRectangles( double, double );
 void drawFlatSymbol();
 void drawSharpSymbol();
 void drawCenterRectangle( char* );
@@ -334,6 +334,7 @@ void eraseCenterRectangle() {
 
 // drawRoundRect(top left x, top left y, width, height, radius, color)
 void drawRectangles(double cents, double inputFreq) {
+  display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
   // rectangle width : 20
   // gap between rectangles : 4
   // gap from screen edge: 14
@@ -345,7 +346,6 @@ void drawRectangles(double cents, double inputFreq) {
   drawSharpSymbol();
 
   display.setCursor(10, 30);
-  display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
   display.setTextSize(2);
   display.print(inputFreq);
   display.print("Hz   ");
@@ -476,6 +476,7 @@ void drawPluckStringScreen() {
   if (mode_selected == 0 && string_selected < 5) {
     string_selected += 1;
     // add "move to next string" screen
+    screen_value = 6;
     drawScreen();
   } else {
     screen_value = 3;
@@ -1000,7 +1001,7 @@ unsigned long tuning_test( double input_freq ){
       freq_diff = current_freq - target_freq;
       current_cents = cents_calculate( current_freq, target_freq);
 
-      drawCenterRectangle(current_cents, current_freq);
+      drawRectangles(current_cents, current_freq);
 
       if( current_freq < 60 ){
           ;;
