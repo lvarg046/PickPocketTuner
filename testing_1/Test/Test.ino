@@ -312,12 +312,20 @@ void drawPrevLeftTriangle() {
   display.println("PREV");
 }
 
+void erasePrevLeftTriangle() {
+  display.fillRect(10, 100, 46, 60, ST77XX_BLACK);
+}
+
 void drawSkipRightTriangle() {
   display.fillTriangle(230, 115, 210, 130, 210, 100, ST77XX_WHITE);
-  display.setCursor(230, 136);
+  display.setCursor(192, 136);
   display.setTextSize(2);
   display.setTextColor(ST77XX_WHITE);
   display.println("SKIP");
+}
+
+void eraseSkipRightTriangle() {
+  display.fillRect(190, 100, 50, 60, ST77XX_BLACK);
 }
 
 // drawRect(top left x, top left y, width, height, color)
@@ -334,16 +342,6 @@ void eraseCenterRectangle() {
 
 // drawRoundRect(top left x, top left y, width, height, radius, color)
 void drawRectangles(double cents, double inputFreq) {
-  display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
-  display.setTextSize(4);
-
-  if (strlen(premade_tuning_lib_letter[library_selected][string_selected]) > 1) {
-    display.setCursor(102, 10);
-  } else {
-    display.setCursor(113, 10);
-  }
-
-  display.print(premade_tuning_lib_letter[library_selected][string_selected]);
   // rectangle width : 20
   // gap between rectangles : 4
   // gap from screen edge: 14
@@ -357,7 +355,8 @@ void drawRectangles(double cents, double inputFreq) {
   display.setCursor(10, 30);
   display.setTextSize(2);
   display.print(inputFreq);
-  display.print("Hz   ");
+  display.setCursor(13, 50);
+  display.print("Hz");
 
   for (int i = 0; i < 9; i++) {
     uint16_t curr_color = rect_colors[i];
@@ -369,6 +368,16 @@ void drawRectangles(double cents, double inputFreq) {
     display.fillRoundRect(cursorx, cursory, 20, 40, 1, curr_color);
     cursorx += 24;
   }
+  
+  display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+  display.setTextSize(4);
+
+  if (strlen(premade_tuning_lib_letter[library_selected][string_selected]) > 1) {
+    display.setCursor(102, 10);
+  } else {
+    display.setCursor(113, 10);
+  }
+  display.print(premade_tuning_lib_letter[library_selected][string_selected]);
 }
 
 void drawFlatSymbol() {
@@ -445,7 +454,16 @@ void drawStringSelectionScreen() {
   display.setTextSize(3);
   display.setCursor(0, 10);
   display.println( "Select String" );
-  display.println( "String #" + (String)(string_selected + (6 - ( (string_selected * 2 )))) ); 
+
+  display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+  display.setTextSize(4);
+
+  if (strlen(premade_tuning_lib_letter[library_selected][string_selected]) > 1) {
+    display.setCursor(102, 110);
+  } else {
+    display.setCursor(113, 110);
+  }
+  display.print(premade_tuning_lib_letter[library_selected][string_selected]);
 }
 
 void drawTuningLibrarySelectionScreen() {
@@ -468,6 +486,8 @@ void drawTuningLibrarySelectionScreen() {
 
 void drawPluckStringScreen() {
   eraseCenterRectangle();
+  eraseSkipRightTriangle();
+  erasePrevLeftTriangle();
   // fft
   delay(500);
   unsigned long myTime;
@@ -521,10 +541,14 @@ void drawTuningScreen() {
 
   display.setTextSize(2);
   display.print(premade_tuning_lib[library_selected][string_selected]);
-  display.setCursor(180, 50);
+  display.setCursor(183, 50);
   display.print("Hz");
 
-  drawPrevLeftTriangle();
+  if (string_selected == 0) {
+    drawPrevLeftTriangle();
+  } else {
+    drawLeftTriangle();
+  }
   if (mode_selected == 0 && string_selected < 5) // auto tuning
     drawSkipRightTriangle();
   drawCenterRectangle("TUNE");
@@ -748,9 +772,14 @@ void device_operations() {
           break;
         
         case 6: // tuning screen
-          screen_value = 2;
-          string_selected = 0;
-          drawScreen();
+          if (string_selected == 0) {
+            screen_value = 2;
+            string_selected = 0;
+            drawScreen();
+          } else {
+            string_selected -= 1;
+            drawScreen();
+          }
           break;
       }
 
@@ -994,7 +1023,7 @@ unsigned long tuning_test( double input_freq ){
   unsigned long time1 = millis();
   current_cents = cents_calculate( current_freq, target_freq );
 
-  while( current_cents > 1.0 || current_cents < -1.0){
+  while( current_cents > 1.0 || current_cents < -1.0 ){
       current_freq = fft();
       
       if( current_freq < 63 ){
@@ -1016,48 +1045,55 @@ unsigned long tuning_test( double input_freq ){
 
       drawRectangles(current_cents, current_freq);
 
-      if( current_freq < 60 ){
-          ;;
+      if( current_freq < 60 ){ 
+          ;; // no spin >:( 
       } else {
-          if( (current_cents > 30 ) || (current_cents < -30) ) 
+          if( (current_cents >= 50 ) || (current_cents <= -50) ) 
           {
               if( freq_diff < 0){
                   spinMotorSharp(200, current_freq );
               } else{
                   spinMotorFlat(200, current_freq);
               }
-          } else if( (current_cents> 10 && current_cents <= 30) || ( current_cents <-10 && current_cents >= -30) ) {
-              if( freq_diff <0 ){
+          } else if( (current_cents < 50 && current_cents >= 30) || ( current_cents <= -30 && current_cents > -50) ){
+              if( freq_diff < 0 ){
+                  spinMotorSharp(100, current_freq);
+              } else{
+                  spinMotorFlat(100, current_freq);
+              }
+
+          }else if( (current_cents < 30 && current_cents >= 10) || ( current_cents <= -10 && current_cents > -30) ) {
+              if( freq_diff < 0 ){
                   spinMotorSharp(75, current_freq);
               } else {
                   spinMotorFlat(75, current_freq);
               }
-          } else if( (current_cents <= 10 && current_cents >=5)  || (current_cents <= -5 && current_cents >= 10) ){
+          } else if( (current_cents < 10 && current_cents >= 5)  || (current_cents <= -5 && current_cents > -10) ){
               if( freq_diff < 0 ){
                   spinMotorSharp(50, current_freq);
               } else {
                   spinMotorFlat(50, current_freq);
               }
-          } else if( (current_cents < 5 && current_cents >= 3) || 
-                     ( current_cents <= -3 && current_cents >= -5) ){
+          } else if( (current_cents < 5 && current_cents >= 3) || ( current_cents <= -3 && current_cents > -5) ){
                 if( freq_diff < 0 ){
-                    spinMotorSharp(35, current_freq);
+                    spinMotorSharp(30, current_freq);
                 } else {
-                    spinMotorFlat(35, current_freq);
+                    spinMotorFlat(30, current_freq);
                 }
-          } else {
+          } else if( current_cents < 3 && current_cents > -3  ){
               if( freq_diff < 0 ){
                   spinMotorSharp(20, current_freq);
               } else {
                   spinMotorFlat(20, current_freq);
               }
-          }
+          } 
       }
-      }
+    }
   }   
   time1 = millis() - time1;
+  time1 = time1 / 1000;
   tone(BUZZ, 60);
-  delay(65);
+  delay(100);
   noTone(BUZZ);
   delay(2000);
   return time1;
