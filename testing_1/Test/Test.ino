@@ -46,16 +46,16 @@ ESP8266WebServer server(80);
 /* DISPLAY */
 #define TFT_DC 5 // D1
 #define TFT_RST 2 // D4
-#define TFT_CS 12
+#define TFT_CS 12 // D6
 
 /* BUTTONS */
-#define BUTTON_LEFT 9
-#define BUTTON_CENTER 10
-#define BUTTON_RIGHT 4
+#define BUTTON_LEFT 9 // SD2
+#define BUTTON_CENTER 10 // SD3
+#define BUTTON_RIGHT 4 // D2
 
 /* ANALOG DEVICES */
 #define ANALOG_INPUT A0
-#define BUZZ 0
+#define BUZZ 0 // D3
 
 /* MOTOR */
 #define DIR_WIRE 1 // ORANGE
@@ -64,7 +64,7 @@ ESP8266WebServer server(80);
 
 // Removed Knight Image bitmap for readability
 
-// function headers
+// // function headers
 void ICACHE_RAM_ATTR button_left_pressed();
 void ICACHE_RAM_ATTR button_center_pressed();
 void ICACHE_RAM_ATTR button_right_pressed();
@@ -98,7 +98,7 @@ float tuning_base [12][2] = { // This is to use to find the octave we're in
 };
 
 
-float tuning_array [12][7] = { // Based on A - 440 Standard
+const float tuning_array [12][7] PROGMEM = { // Based on A - 440 Standard
     {12.98, 25.96, 51.91, 103.83, 207.65, 415.30, 830.61 }, // Ab/G# - Octaves
     {13.75, 27.50, 55.00, 110.00, 220.00, 440.00, 880.00 }, // A Octaves
     {14.57, 29.14, 58.27, 116.54, 233.08, 466.16, 932.33 }, // A#/Bb - Octaves 
@@ -119,32 +119,18 @@ float tuning_array [12][7] = { // Based on A - 440 Standard
 *   Order is 6, 5, 4, 3, 2, 1
 */
 float premade_tuning_lib [11][6] = { // Based on A - 440 Standard
-    {tuning_array[8][2], tuning_array[1][3], tuning_array[6][3], tuning_array[11][3], tuning_array[3][4], tuning_array[8][4]},// E - Standard  E-A-D-G-B-E
-    {tuning_array[6][2], tuning_array[11][2], tuning_array[4][3], tuning_array[9][3], tuning_array[1][4], tuning_array[6][4]}, // D - Standard  D-G-C-F-A-D
-    {77.78, 103.83, 138.57, 185.00, 233.08, 311.13},// Eb - Standard Eb-Ab-Db-Gb-Bb-Eb
-    {73.42, 110.00, 146.83, 196.00, 246.94, 329.63},// Drop D        D-A-D-G-B-E
-    {65.41, 98.00, 130.81, 174.61, 220.00, 293.66}, // Drop C        C-G-C-F-A-D
-    {61.74, 92.50, 123.47, 164.81, 207.65, 277.18}, // Drop B        B-Gb-B-E-Ab-Db
-    {55.00, 82.51, 110.00, 146.83, 185.00, 246.94}, // Drop A        A-E-A-D-F#-B
-    {77.78, 110.00, 146.83, 186.00, 220.00, 293.66},// Open D        D-A-D-F#-A-D
-    {77.78, 98.00, 146.83, 196.00, 246.94, 293.66}, // Open G        D-G-D-G-B-D
-    {65.41, 98.00, 130.81, 196.00, 261.63, 329.63}, // Open C        C-G-C-G-C-E
-    {82.41, 123.47, 164.81, 207.65, 246.94, 329.63} // Open E        E-B-E-G#-B-E
+    { pgm_read_float(&tuning_array[8][2]), pgm_read_float(&tuning_array[1][3]), pgm_read_float(&tuning_array[6][3]), pgm_read_float(&tuning_array[11][3]), pgm_read_float(&tuning_array[3][4]), pgm_read_float(&tuning_array[8][4]) },// E - Standard  E-A-D-G-B-E
+    { pgm_read_float(&tuning_array[7][2]), pgm_read_float(&tuning_array[0][4]), pgm_read_float(&tuning_array[5][3]), pgm_read_float(&tuning_array[10][3]), pgm_read_float(&tuning_array[2][4]), pgm_read_float(&tuning_array[7][4]) },// Eb - Standard Eb-Ab-Db-Gb-Bb-Eb
+    { pgm_read_float(&tuning_array[6][2]), pgm_read_float(&tuning_array[11][2]), pgm_read_float(&tuning_array[4][3]), pgm_read_float(&tuning_array[9][3]), pgm_read_float(&tuning_array[1][4]), pgm_read_float(&tuning_array[6][4]) }, // D - Standard  D-G-C-F-A-D
+    { pgm_read_float(&tuning_array[6][2]), pgm_read_float(&tuning_array[1][3]), pgm_read_float(&tuning_array[6][3]), pgm_read_float(&tuning_array[11][3]), pgm_read_float(&tuning_array[3][4]), pgm_read_float(&tuning_array[8][4]) },// Drop D        D-A-D-G-B-E
+    { pgm_read_float(&tuning_array[4][2]), pgm_read_float(&tuning_array[11][2]), pgm_read_float(&tuning_array[4][3]), pgm_read_float(&tuning_array[9][3]), pgm_read_float(&tuning_array[1][4]), pgm_read_float(&tuning_array[6][4]) }, // Drop C        C-G-C-F-A-D
+    { pgm_read_float(&tuning_array[3][2]), pgm_read_float(&tuning_array[10][2]), pgm_read_float(&tuning_array[3][3]), pgm_read_float(&tuning_array[8][3]), pgm_read_float(&tuning_array[0][4]), pgm_read_float(&tuning_array[5][4]) }, // Drop B        B-Gb-B-E-Ab-Db
+    { pgm_read_float(&tuning_array[1][2]), pgm_read_float(&tuning_array[8][2]), pgm_read_float(&tuning_array[1][3]), pgm_read_float(&tuning_array[6][3]), pgm_read_float(&tuning_array[10][3]), pgm_read_float(&tuning_array[3][4]) }, // Drop A        A-E-A-D-F#-B
+    { pgm_read_float(&tuning_array[7][2]), pgm_read_float(&tuning_array[1][3]), pgm_read_float(&tuning_array[6][3]), pgm_read_float(&tuning_array[10][3]), pgm_read_float(&tuning_array[1][4]), pgm_read_float(&tuning_array[6][4]) },// Open D        D-A-D-F#-A-D
+    { pgm_read_float(&tuning_array[7][2]), pgm_read_float(&tuning_array[11][2]), pgm_read_float(&tuning_array[6][3]), pgm_read_float(&tuning_array[11][3]), pgm_read_float(&tuning_array[3][4]), pgm_read_float(&tuning_array[6][4]) }, // Open G        D-G-D-G-B-D
+    { pgm_read_float(&tuning_array[4][2]), pgm_read_float(&tuning_array[11][2]), pgm_read_float(&tuning_array[4][3]), pgm_read_float(&tuning_array[11][3]), pgm_read_float(&tuning_array[4][4]), pgm_read_float(&tuning_array[8][4]) }, // Open C        C-G-C-G-C-E
+    { pgm_read_float(&tuning_array[8][2]), pgm_read_float(&tuning_array[3][3]), pgm_read_float(&tuning_array[8][3]), pgm_read_float(&tuning_array[0][4]), pgm_read_float(&tuning_array[3][4]), pgm_read_float(&tuning_array[8][4]) } // Open E        E-B-E-G#-B-E
 };
-
-// float premade_tuning_lib [11][6] = { // Based on A - 440 Standard
-//     {tuning_array[8][2], tuning_array[1][3], tuning_array[6][3], tuning_array[11][3], tuning_array[3][4], tuning_array[8][4]},// E - Standard  E-A-D-G-B-E
-//     {73.42, 98.00, 130.81, 174.61, 220.00, 293.66}, // D - Standard  D-G-C-F-A-D
-//     {77.78, 103.83, 138.57, 185.00, 233.08, 311.13},// Eb - Standard Eb-Ab-Db-Gb-Bb-Eb
-//     {73.42, 110.00, 146.83, 196.00, 246.94, 329.63},// Drop D        D-A-D-G-B-E
-//     {65.41, 98.00, 130.81, 174.61, 220.00, 293.66}, // Drop C        C-G-C-F-A-D
-//     {61.74, 92.50, 123.47, 164.81, 207.65, 277.18}, // Drop B        B-Gb-B-E-Ab-Db
-//     {55.00, 82.51, 110.00, 146.83, 185.00, 246.94}, // Drop A        A-E-A-D-F#-B
-//     {77.78, 110.00, 146.83, 186.00, 220.00, 293.66},// Open D        D-A-D-F#-A-D
-//     {77.78, 98.00, 146.83, 196.00, 246.94, 293.66}, // Open G        D-G-D-G-B-D
-//     {65.41, 98.00, 130.81, 196.00, 261.63, 329.63}, // Open C        C-G-C-G-C-E
-//     {82.41, 123.47, 164.81, 207.65, 246.94, 329.63} // Open E        E-B-E-G#-B-E
-// };
 
 
 const char* premade_tuning_lib_letter [11][6] = {
@@ -190,6 +176,7 @@ Adafruit_ST7789 display = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 void setup() {
   Serial.begin(115200);
   
+  
   // init EEPROM object 
   // to read/write wifi configuration.
   EEPROM.begin(512);
@@ -210,8 +197,6 @@ void setup() {
   pinMode(DIR_WIRE, OUTPUT);
   pinMode(PWM_WIRE, OUTPUT);
 
-  digitalWrite(DIR_WIRE, HIGH);
-  analogWrite(PWM_WIRE, 255);
   initialize_buttons();
 }
 
@@ -225,8 +210,8 @@ void loop() {
   // This must be called regularly
   // for the webserver to work.
   server.handleClient();
-  
-  if ( button_flags[0] ) {
+
+  if  ( button_flags[0] ) {
     button_operations();
     device_operations();
   }
@@ -272,7 +257,7 @@ void drawPrevLeftTriangle() {
   display.setCursor(10, 136);
   display.setTextSize(2);
   display.setTextColor(ST77XX_WHITE);
-  display.println("PREV");
+  display.println("BACK");
 }
 
 void erasePrevLeftTriangle() {
@@ -300,7 +285,7 @@ void drawCenterRectangle(char* text) {
 }
 
 void eraseCenterRectangle() {
-  display.fillRect(80, 100, 80, 40, ST77XX_BLACK);
+  display.fillRect(60, 100, 120, 40, ST77XX_BLACK);
 }
 
 // drawRoundRect(top left x, top left y, width, height, radius, color)
@@ -374,13 +359,17 @@ void drawIntroScreen() {
   delay(3000);
 
   screen_value = 1;
+  display.fillScreen(ST77XX_BLACK);
   drawScreen();
 }
 
 void drawModeSelectionScreen() {
-  display.fillScreen(ST77XX_BLACK);
-  if (mode_selected > 0)
+  eraseCenterRectangle();
+  if (mode_selected > 0) {
     drawLeftTriangle();
+  } else {
+    erasePrevLeftTriangle();
+  }
   if (mode_selected < 2)
     drawRightTriangle();
   display.setCursor(20, 10);
@@ -391,26 +380,28 @@ void drawModeSelectionScreen() {
     display.setCursor(20, 40);
     switch (mode_selected) {
       case 0: // Mode 0: Auto Mode, Goes through all strings
-        display.println("Auto Tuning");
+        display.println("Auto Tuning ");
         break;
 
       case 1: // Mode 1: Individual String Mode
-        display.println("Indv. String");
+        display.println("Indv. String ");
         break;
 
       case 2: // Mode 2: Free Tuning Mode
-        display.println("Free Tuning");
+        display.println("Free Tuning ");
         break;
     }
 }
 
 // display.String# displays correct number of string in correct order.
 void drawStringSelectionScreen() {
-  display.fillScreen(ST77XX_BLACK);
+  eraseCenterRectangle();
+  erasePrevLeftTriangle();
   if (string_selected == 0)
     drawPrevLeftTriangle();
-  if (string_selected > 0)
+  if (string_selected > 0) {
     drawLeftTriangle();
+  }
   if (string_selected < 5)
     drawRightTriangle();
   display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
@@ -430,13 +421,18 @@ void drawStringSelectionScreen() {
 }
 
 void drawTuningLibrarySelectionScreen() {
-  display.fillScreen(ST77XX_BLACK);
+  eraseCenterRectangle();
+  erasePrevLeftTriangle();
   if (library_selected == 0)
     drawPrevLeftTriangle();
-  if (library_selected > 0)
+  if (library_selected > 0) {
     drawLeftTriangle();
-  if (library_selected < 10)
+  }
+  if (library_selected < 10) {
     drawRightTriangle();
+  } else {
+    eraseSkipRightTriangle();
+  }
   display.setCursor(10, 10);
   display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
   display.setTextSize(3);
@@ -458,7 +454,7 @@ void drawPluckStringScreen() {
   myTime = tuning_test(peak);
   display.setCursor(98, 113);
   display.setTextSize(2);
-  display.println("TIME: "+(String)(myTime));
+  display.println("TIME: " + (String)(myTime));
   delay(5000);
   // spin the motor based off of fft reading
   // if auto mode, go to next string
@@ -473,6 +469,7 @@ void drawPluckStringScreen() {
   } else {
     screen_value = 2;
     string_selected = 0;
+    display.fillScreen(ST77XX_BLACK);
     drawScreen();
   }
 }
@@ -510,6 +507,7 @@ void drawTuningScreen() {
   if (string_selected == 0 || mode_selected == 1) {
     drawPrevLeftTriangle();
   } else {
+    erasePrevLeftTriangle();
     drawLeftTriangle();
   }
   if (mode_selected == 0 && string_selected < 5) // auto tuning
@@ -518,7 +516,6 @@ void drawTuningScreen() {
 }
 
 void drawFreeTuneScreen() {
-  display.fillScreen(ST77XX_BLACK);
   drawRightTriangle();
   drawLeftTriangle();
   display.setCursor(10, 10);
@@ -703,6 +700,7 @@ void device_operations() {
           } else {
             library_selected = 0;
             screen_value = 3;
+            display.fillScreen(ST77XX_BLACK);
             drawScreen();
           }
           break;
@@ -714,6 +712,7 @@ void device_operations() {
           } else {
             mode_selected = 0;
             screen_value = 1;
+            display.fillScreen(ST77XX_BLACK);
             drawScreen();
           }
           break;
@@ -731,6 +730,7 @@ void device_operations() {
         case 5: // pluck string screen
           screen_value = 2;
           string_selected = 0;
+          display.fillScreen(ST77XX_BLACK);
           drawScreen();
           break;
         
@@ -743,11 +743,13 @@ void device_operations() {
               screen_value = 3;
               library_selected = 0;
             }
+            display.fillScreen(ST77XX_BLACK);
             drawScreen();
           } else {
             if (mode_selected == 1) { // indiv string
               screen_value = 2;
               string_selected = 0;
+              display.fillScreen(ST77XX_BLACK);
             } else {
               string_selected -= 1;
             }
@@ -768,17 +770,20 @@ void device_operations() {
             case 0: // auto tuning
               screen_value = 3;
               library_selected = 0;
+              display.fillScreen(ST77XX_BLACK);
               drawScreen();
               break;
 
             case 1: // individual string tuning
               screen_value = 3;
               library_selected = 0;
+              display.fillScreen(ST77XX_BLACK);
               drawScreen();
               break;
 
             case 2: // free tuning
               screen_value = 4;
+              display.fillScreen(ST77XX_BLACK);
               drawScreen();
               break;
           }
@@ -786,6 +791,7 @@ void device_operations() {
           break;
         case 2: // string selection
           screen_value = 6;
+          display.fillScreen(ST77XX_BLACK);
           drawScreen();
           break;
 
@@ -793,9 +799,11 @@ void device_operations() {
           if (mode_selected == 1) {
             screen_value = 2;
             string_selected = 0;
+            display.fillScreen(ST77XX_BLACK);
             drawScreen();
           } else {
             screen_value = 6;
+            display.fillScreen(ST77XX_BLACK);
             drawScreen();
           }
           break;
@@ -803,6 +811,7 @@ void device_operations() {
         case 4: // free tuning
           screen_value = 1;
           mode_selected = 0;
+          display.fillScreen(ST77XX_BLACK);
           drawScreen();
           break;
         
@@ -933,14 +942,9 @@ void button_operations() {
 float algo_riddim(float input_fr, int std_fr_in, int std_fr_out, float table_440_const){ // Finding shift from 4XX to 4XX freq
     float output_freq;
     float base_out = base_freq_calc(tuning_base[7][0], tuning_base[7][1], freq_base_A[0], freq_base_A[6]);
-    int octave = octave_calc(base_out, input_fr);;
+    double octave = octave_calc(base_out, input_fr);
 
-    Serial.print( "Expect:627.91 BASE: " );
-    Serial.println(base_out); 
     // int oct = octave_calc( tuning_base[4][0], tuning_array[4][1]);
-
-    Serial.print( "Expect:4 Octave: " );
-    Serial.println(octave);
     // float rebased = base_freq_calc( tuning_base[7][0], table_440_const, std_fr_in, std_fr_out);
     // octave = octave_calc(rebased, input_fr);
 
