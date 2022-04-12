@@ -119,7 +119,7 @@ const float tuning_array [12][7] PROGMEM = { // Based on A - 440 Standard
 */
 float premade_tuning_lib [11][6] = { // Based on A - 440 Standard
     { pgm_read_float(&tuning_array[8][2]), pgm_read_float(&tuning_array[1][3]), pgm_read_float(&tuning_array[6][3]), pgm_read_float(&tuning_array[11][3]), pgm_read_float(&tuning_array[3][4]), pgm_read_float(&tuning_array[8][4]) },// E - Standard  E-A-D-G-B-E
-    { pgm_read_float(&tuning_array[7][2]), pgm_read_float(&tuning_array[0][4]), pgm_read_float(&tuning_array[5][3]), pgm_read_float(&tuning_array[10][3]), pgm_read_float(&tuning_array[2][4]), pgm_read_float(&tuning_array[7][4]) },// Eb - Standard Eb-Ab-Db-Gb-Bb-Eb
+    { pgm_read_float(&tuning_array[7][2]), pgm_read_float(&tuning_array[0][3]), pgm_read_float(&tuning_array[5][3]), pgm_read_float(&tuning_array[10][3]), pgm_read_float(&tuning_array[2][4]), pgm_read_float(&tuning_array[7][4]) },// Eb - Standard Eb-Ab-Db-Gb-Bb-Eb
     { pgm_read_float(&tuning_array[6][2]), pgm_read_float(&tuning_array[11][2]), pgm_read_float(&tuning_array[4][3]), pgm_read_float(&tuning_array[9][3]), pgm_read_float(&tuning_array[1][4]), pgm_read_float(&tuning_array[6][4]) }, // D - Standard  D-G-C-F-A-D
     { pgm_read_float(&tuning_array[6][2]), pgm_read_float(&tuning_array[1][3]), pgm_read_float(&tuning_array[6][3]), pgm_read_float(&tuning_array[11][3]), pgm_read_float(&tuning_array[3][4]), pgm_read_float(&tuning_array[8][4]) },// Drop D        D-A-D-G-B-E
     { pgm_read_float(&tuning_array[4][2]), pgm_read_float(&tuning_array[11][2]), pgm_read_float(&tuning_array[4][3]), pgm_read_float(&tuning_array[9][3]), pgm_read_float(&tuning_array[1][4]), pgm_read_float(&tuning_array[6][4]) }, // Drop C        C-G-C-F-A-D
@@ -134,8 +134,8 @@ float premade_tuning_lib [11][6] = { // Based on A - 440 Standard
 
 const char* premade_tuning_lib_letter [11][6] = {
   {"E", "A", "D", "G", "B", "E"},       // E - Standard  E-A-D-G-B-E
-  {"D", "G", "C", "F", "A", "D"},       // D - Standard  D-G-C-F-A-D
   {"Eb", "Ab", "Db", "Gb", "Bb", "Eb"}, // Eb - Standard Eb-Ab-Db-Gb-Bb-Eb
+  {"D", "G", "C", "F", "A", "D"},       // D - Standard  D-G-C-F-A-D
   {"D", "A", "D", "G", "B", "E"},       // Drop D        D-A-D-G-B-E
   {"C", "G", "C", "F", "A", "D"},       // Drop C        C-G-C-F-A-D
   {"B", "Gb", "B", "E", "Ab", "Db"},    // Drop B        B-Gb-B-E-Ab-Db
@@ -146,7 +146,7 @@ const char* premade_tuning_lib_letter [11][6] = {
   {"E", "B", "E", "G#", "B", "E"}       // Open E        E-B-E-G#-B-E
 };
 
-const char *lib_name[12]= {"E Std", "D Std", "Eb Std", "Drop D", "Drop C", "Drop B", "Drop A", 
+const char *lib_name[12]= {"E Std", "Eb Std", "D Std", "Drop D", "Drop C", "Drop B", "Drop A", 
                                 "Open D", "Open G", "Open C", "Open E"};
                             
 const char *note_name[12] = {"G#/Ab", "A", "A#/Bb", "B", "C", "C#/Db", "D", "D#/Eb", 
@@ -1088,6 +1088,10 @@ unsigned long tuning_test( double input_freq ){
 /*
 *   Work on Homescreen GUI
 *   AUTO TUNE: Remove "TUNE" button selection. Just have it move to the next string automatically
+*   Free Mode change name to String winding
+*   Maybe free mode display string freq/note?
+*   Add New String input, winds until tight-ish?
+*   Tuning bar: only one bar moving, rather than the whole set of bars filling?
 *   __________________________________________
 *   Save custom tuning? i.e. custom lib?
 *   change from 440 to 4XX intonation 
