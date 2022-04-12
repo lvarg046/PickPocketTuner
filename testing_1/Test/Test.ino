@@ -370,8 +370,12 @@ void drawModeSelectionScreen() {
   } else {
     erasePrevLeftTriangle();
   }
-  if (mode_selected < 2)
+  if (mode_selected < 2) {
     drawRightTriangle();
+  } else {
+    eraseSkipRightTriangle();
+  }
+
   display.setCursor(20, 10);
   display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
   display.setTextSize(3);
@@ -396,14 +400,18 @@ void drawModeSelectionScreen() {
 // display.String# displays correct number of string in correct order.
 void drawStringSelectionScreen() {
   eraseCenterRectangle();
-  erasePrevLeftTriangle();
-  if (string_selected == 0)
+  if (string_selected == 0) {
     drawPrevLeftTriangle();
-  if (string_selected > 0) {
+  } else {
+    erasePrevLeftTriangle();
     drawLeftTriangle();
   }
-  if (string_selected < 5)
+  if (string_selected < 5) {
     drawRightTriangle();
+  } else {
+    eraseSkipRightTriangle();
+  }
+    
   display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
   display.setTextSize(3);
   display.setCursor(0, 10);
@@ -424,10 +432,10 @@ void drawStringSelectionScreen() {
 
 void drawTuningLibrarySelectionScreen() {
   eraseCenterRectangle();
-  erasePrevLeftTriangle();
-  if (library_selected == 0)
+  if (library_selected == 0) {
     drawPrevLeftTriangle();
-  if (library_selected > 0) {
+  } else {
+    erasePrevLeftTriangle();
     drawLeftTriangle();
   }
   if (library_selected < 10) {
@@ -512,8 +520,12 @@ void drawTuningScreen() {
     erasePrevLeftTriangle();
     drawLeftTriangle();
   }
-  if (mode_selected == 0 && string_selected < 5) // auto tuning
+  if (mode_selected == 0 && string_selected < 5) { // auto tuning
     drawSkipRightTriangle();
+  } else {
+    eraseSkipRightTriangle();
+  }
+  
   drawCenterRectangle("TUNE");
 }
 
