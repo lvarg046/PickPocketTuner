@@ -3,7 +3,6 @@
 #include <ESP8266WebServer.h>
 #include <ArduinoOTA.h>
 
-
 /* GRAPHICS/DISPLAY LIBRARIES */
 #include <Adafruit_GFX.h>
 #include <Adafruit_ST7789.h>
@@ -175,8 +174,7 @@ Adafruit_ST7789 display = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 
 void setup() {
   Serial.begin(115200);
-  
-  
+
   // init EEPROM object 
   // to read/write wifi configuration.
   EEPROM.begin(512);
@@ -196,7 +194,7 @@ void setup() {
   pinMode(BUZZ, OUTPUT);
   pinMode(DIR_WIRE, OUTPUT);
   pinMode(PWM_WIRE, OUTPUT);
-
+  analogWrite(PWM_WIRE, 255);
   initialize_buttons();
 }
 
@@ -343,19 +341,21 @@ void drawSharpSymbol() {
 void drawIntroScreen() {
 
 //   display.drawRGBBitmap(0,0, knight, 240, 240);
-  display.fillScreen(0x000F);
+  display.fillScreen(ST77XX_BLACK);
+  display.fillRect(10, 95, 140, 195, 0x000F);
   display.setCursor(10, 100);
   display.setTextColor(ST77XX_WHITE, 0x000F);
   display.setTextSize(3);
   display.println( "Pick" );
-  display.setCursor(10, 140);
+  display.setCursor(10, 130);
   display.println( "Pocket" );
-  display.setCursor(10, 180);
+  display.setCursor(10, 160);
   display.println( "Tuner" );
   display.setTextSize(2);
-  display.setCursor(10, 220);
+  display.setCursor(10, 190);
   display.println( "Group 42" );
   display.println();
+  
   delay(3000);
 
   screen_value = 1;
@@ -408,7 +408,9 @@ void drawStringSelectionScreen() {
   display.setTextSize(3);
   display.setCursor(0, 10);
   display.println( "Select String" );
-
+    tone(BUZZ, 60);
+    delay(100);
+    noTone(BUZZ);
   display.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
   display.setTextSize(4);
 
@@ -1068,3 +1070,14 @@ unsigned long tuning_test( double input_freq ){
   delay(2000);
   return time1;
 }
+
+
+// TODO: 
+/*
+*   Work on Homescreen GUI
+*   AUTO TUNE: Remove "TUNE" button selection. Just have it move to the next string automatically
+*   __________________________________________
+*   Save custom tuning? i.e. custom lib?
+*   change from 440 to 4XX intonation 
+*   Test on other stringed instrument? 
+*/
