@@ -174,6 +174,9 @@ Adafruit_ST7789 display = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 
 void setup() {
   Serial.begin(115200);
+  pinMode(DIR_WIRE, OUTPUT);
+  pinMode(PWM_WIRE, OUTPUT);
+  analogWrite(PWM_WIRE, 255);
 
   // init EEPROM object 
   // to read/write wifi configuration.
@@ -192,9 +195,7 @@ void setup() {
   drawIntroScreen();
 
   pinMode(BUZZ, OUTPUT);
-  pinMode(DIR_WIRE, OUTPUT);
-  pinMode(PWM_WIRE, OUTPUT);
-  analogWrite(PWM_WIRE, 255);
+  
   initialize_buttons();
 }
 
@@ -342,19 +343,45 @@ void drawIntroScreen() {
 
 //   display.drawRGBBitmap(0,0, knight, 240, 240);
   display.fillScreen(ST77XX_BLACK);
-  display.fillRect(10, 95, 140, 195, 0x000F);
-  display.setCursor(10, 100);
-  display.setTextColor(ST77XX_WHITE, 0x000F);
+  display.fillRect(60, 63, 115, 120, 0xFE63);
+  
+  // Thicker lines at edges of screen
+  // Top Left
+  display.drawLine(0, 0, 59, 63, 0XFE63);
+  display.drawLine(1, 0, 59, 63, 0XFE63);
+  display.drawLine(0, 1, 59, 63, 0XFE63);
+  // Top Right
+  display.drawLine(175, 62, 240, 0, 0XFE63);
+  display.drawLine(175, 62, 239, 0, 0XFE63);
+  display.drawLine(175, 62, 240, 1, 0XFE63);
+  // Bottom Left
+  display.drawLine(60, 182, 0, 240, 0XFE63);
+  display.drawLine(60, 182, 1, 240, 0XFE63);
+  display.drawLine(60, 182, 0, 239, 0XFE63);
+  // Bottom Right
+  display.drawLine(174, 182, 240, 240, 0XFE63);
+  display.drawLine(174, 182, 239, 240, 0XFE63);
+  display.drawLine(174, 182, 240, 239, 0XFE63);
+  // Top Mid
+  display.drawLine(120, 63, 120, 0, 0XFE63);
+  display.drawLine(121, 63, 121, 0, 0XFE63);
+  display.drawLine(119, 63, 119, 0, 0XFE63);
+  // Bottom Mid
+  display.drawLine(120, 178, 120, 240, 0XFE63);
+  display.drawLine(121, 178, 121, 240, 0XFE63);
+  display.drawLine(119, 178, 119, 240, 0XFE63);
+
+  display.setCursor(65, 68);
+  display.setTextColor(ST77XX_BLACK, 0xFE63);
   display.setTextSize(3);
   display.println( "Pick" );
-  display.setCursor(10, 130);
+  display.setCursor(65, 98);
   display.println( "Pocket" );
-  display.setCursor(10, 160);
+  display.setCursor(65, 128);
   display.println( "Tuner" );
   display.setTextSize(2);
-  display.setCursor(10, 190);
+  display.setCursor(65, 158);
   display.println( "Group 42" );
-  display.println();
   
   delay(3000);
 
@@ -679,7 +706,7 @@ double fft() {
     return peak;
 }
 
-void spinMotorFlat(int time, double freq) {
+void spinMotorFlat(int time, double freq) { // Loosens tension
     motor_flag = LOW;
     digitalWrite(DIR_WIRE, motor_flag);
     analogWrite(PWM_WIRE, 0);
@@ -687,7 +714,7 @@ void spinMotorFlat(int time, double freq) {
     analogWrite(PWM_WIRE, 255);
 }
 
-void spinMotorSharp(int time, double freq) {
+void spinMotorSharp(int time, double freq) { // Increases tension
     motor_flag = HIGH;
     digitalWrite(DIR_WIRE, motor_flag);
     analogWrite(PWM_WIRE, 0);
@@ -1014,7 +1041,7 @@ unsigned long tuning_test( double input_freq ){
   unsigned long time1 = millis();
   current_cents = cents_calculate( current_freq, target_freq );
 
-  while( current_cents > 1.25 || current_cents < -1.25 ){
+  while( current_cents > 1.75 || current_cents < -1.75 ){
       current_freq = fft();
       
       if( current_freq < 63 ){
@@ -1022,6 +1049,7 @@ unsigned long tuning_test( double input_freq ){
       } else {
           octave = octave_calc(target_freq, current_freq); // Calculates octave offset based on current input
           octave = round(octave);
+      
       // Calculates current frequency by either dividing or multiplying by the 2^octave
       current_freq = current_freq * pow(2, octave);  
       freq_diff = current_freq - target_freq;
@@ -1032,45 +1060,43 @@ unsigned long tuning_test( double input_freq ){
       if( current_freq < 60 ){ 
           ;; // no spin >:( 
       } else {
-          if( (current_cents >= 60 ) || (current_cents <= -60) ) 
-          {
-              if( freq_diff < 0){
-                  spinMotorSharp(225, current_freq );
-              } else{
-                  spinMotorFlat(125, current_freq);
-              }
-          } else if( (current_cents < 60 && current_cents >= 30) || ( current_cents <= -30 && current_cents > -60) ){
-              if( freq_diff < 0 ){
-                  spinMotorSharp(100, current_freq);
-              } else{
-                  spinMotorFlat(60, current_freq);
-              }
-
-          }else if( (current_cents < 30 && current_cents >= 15) || ( current_cents <= -15 && current_cents > -30) ) {
-              if( freq_diff < 0 ){
-                  spinMotorSharp(75, current_freq);
-              } else {
-                  spinMotorFlat(40, current_freq);
-              }
-          } else if( (current_cents < 15 && current_cents >= 7.5)  || (current_cents <= -7.5 && current_cents > -15) ){
-              if( freq_diff < 0 ){
-                  spinMotorSharp(50, current_freq);
-              } else {
-                  spinMotorFlat(25, current_freq);
-              }
-          } else if( (current_cents < 7.5 && current_cents >= 3.75) || ( current_cents <= -3.75 && current_cents > -7.5) ){
-                if( freq_diff < 0 ){
-                    spinMotorSharp(30, current_freq);
-                } else {
-                    spinMotorFlat(20, current_freq);
+            if ( (current_cents >= 60 ) || (current_cents <= -60) ) {
+                if( freq_diff < 0){
+                    spinMotorSharp(120, current_freq ); // TO Sharp
+                } else{ 
+                    spinMotorFlat(80, current_freq); // TO Flat
                 }
-          } else if( current_cents < 3.75 && current_cents > -3.75  ){
-              if( freq_diff < 0 ){
-                  spinMotorSharp(20, current_freq);
-              } else {
-                  spinMotorFlat(15, current_freq);
+            } else if( (current_cents < 60 && current_cents >= 30) || ( current_cents <= -30 && current_cents > -60) ){
+                if( freq_diff < 0 ){
+                    spinMotorSharp(75, current_freq);
+                } else{
+                    spinMotorFlat(45, current_freq);
               }
-          } 
+            } else if( (current_cents < 30 && current_cents >= 15) || ( current_cents <= -15 && current_cents > -30) ) {
+                if( freq_diff < 0 ){
+                    spinMotorSharp(65, current_freq);
+                } else {
+                    spinMotorFlat(35, current_freq);
+                }
+            } else if( (current_cents < 15 && current_cents >= 7.5)  || (current_cents <= -7.5 && current_cents > -15) ){
+                if( freq_diff < 0 ){
+                    spinMotorSharp(45, current_freq);
+                } else {
+                    spinMotorFlat(25, current_freq);
+                }
+            } else if( (current_cents < 7.5 && current_cents >= 3.75) || ( current_cents <= -3.75 && current_cents > -7.5) ){
+                if( freq_diff < 0 ){
+                    spinMotorSharp(25, current_freq);
+                } else {
+                    spinMotorFlat(15, current_freq);
+                }
+            } else if( current_cents < 3.75 && current_cents > -3.75  ){
+                if( freq_diff < 0 ){
+                    spinMotorSharp(20, current_freq);
+                } else {
+                    spinMotorFlat(10, current_freq);
+                }
+            }
       }
     }
   }   
@@ -1087,7 +1113,7 @@ unsigned long tuning_test( double input_freq ){
 // TODO: 
 /*
 *   Work on Homescreen GUI
-*   AUTO TUNE: Remove "TUNE" button selection. Just have it move to the next string automatically
+*   AUTO TUNE: Remove "TUNE" button selection. Just have it move to the next string automatically ?
 *   Free Mode change name to String winding
 *   Maybe free mode display string freq/note?
 *   Add New String input, winds until tight-ish?
