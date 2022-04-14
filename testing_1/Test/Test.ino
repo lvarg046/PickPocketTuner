@@ -499,7 +499,7 @@ void drawSelectSettingsOrModeScreen() {
 
     switch (mode_settings_selected) {
         case 0: // Mode 0: Auto Mode, Goes through all strings
-            display.println("Select Mode             ");
+            display.println("Select Mode               ");
             break;
 
         case 1: // Mode 1: Individual String Mode
