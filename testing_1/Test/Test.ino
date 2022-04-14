@@ -1143,33 +1143,27 @@ void initialize_buttons() {
     attachInterrupt(digitalPinToInterrupt(BUTTON_RIGHT), button_right_pressed, HIGH);
 }
 
-void ICACHE_RAM_ATTR
-
-button_left_pressed() {
+void ICACHE_RAM_ATTR button_left_pressed() {
     noInterrupts();
-
+    delay(100);
     button_flags[0] = true;
     button_flags[1] = true;
 
     interrupts();
 }
 
-void ICACHE_RAM_ATTR
-
-button_center_pressed() {
+void ICACHE_RAM_ATTR button_center_pressed() {
     noInterrupts();
-
+    delay(120);
     button_flags[0] = true;
     button_flags[2] = true;
 
     interrupts();
 }
 
-void ICACHE_RAM_ATTR
-
-button_right_pressed() {
+void ICACHE_RAM_ATTR button_right_pressed() {
     noInterrupts();
-
+    delay(100);
     button_flags[0] = true;
     button_flags[3] = true;
 
