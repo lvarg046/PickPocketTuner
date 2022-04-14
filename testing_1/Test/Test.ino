@@ -108,7 +108,6 @@ float tuning_base[12][2] = { // This is to use to find the octave we're in
     {783.99, 3.56} // G
 };
 
-
 float tuning_array[12][7] = { // Based on A - 440 Standard
         {12.98, 25.96, 51.91, 103.83, 207.65, 415.30, 830.61}, // Ab/G# - Octaves
         {13.75, 27.50, 55.00, 110.00, 220.00, 440.00, 880.00}, // A Octaves
@@ -500,7 +499,7 @@ void drawSelectSettingsOrModeScreen() {
 
     switch (mode_settings_selected) {
         case 0: // Mode 0: Auto Mode, Goes through all strings
-            display.println("Select Mode                   ");
+            display.println("Select Mode             ");
             break;
 
         case 1: // Mode 1: Individual String Mode
@@ -607,9 +606,10 @@ void drawPluckStringScreen() {
     double peak = fft();
     myTime = tuning_test(peak);
     display.setCursor(98, 113);
-    display.setTextSize(2);
-    display.println("TIME: " + (String)(myTime));
-    delay(5000);
+    // display.setTextSize(2);
+    // display.println("TIME: " + (String)(myTime));
+    display.println("DONE!");
+    delay(2000);
     // spin the motor based off of fft reading
     // if auto mode, go to next string
     // else go back to library selection
@@ -1325,12 +1325,7 @@ unsigned long tuning_test(double input_freq) {
     delay(2000);
     return time1;
 }
-/*
-  for row in tuning_array
-          adjusted_tuning_array[i][0] = algo_riddim( input_fr = tuning_array[i][0], std_fr_in, std_fr_out = freq_base_A[freq_base_selected], float table_440_const = tuning_base[i][1])
-          for col in tuning_array
-              adjusted_array[i][j] = 2 * adjusted_array[i+1][j - 1]
-*/
+
 void changeOfBase(){
     int i = 0, j = 0;
     for ( i = 0; i < 12; i++ ){
@@ -1339,7 +1334,87 @@ void changeOfBase(){
             tuning_array[i][j] = 2 * tuning_array[i][j-1];
         }
     }
+    assignTuningLib();
 } 
+
+void assignTuningLib() {
+    premade_tuning_lib[0][0] = tuning_array[8][2];
+    premade_tuning_lib[0][1] = tuning_array[1][3];
+    premade_tuning_lib[0][2] = tuning_array[6][3];
+    premade_tuning_lib[0][3] = tuning_array[11][3];
+    premade_tuning_lib[0][4] = tuning_array[3][4];
+    premade_tuning_lib[0][5] = tuning_array[8][4];
+
+    premade_tuning_lib[1][0] = tuning_array[7][2];
+    premade_tuning_lib[1][1] = tuning_array[0][3];
+    premade_tuning_lib[1][2] = tuning_array[5][3];
+    premade_tuning_lib[1][3] = tuning_array[10][3];
+    premade_tuning_lib[1][4] = tuning_array[2][4];
+    premade_tuning_lib[1][5] = tuning_array[7][4];
+
+    premade_tuning_lib[2][0] = tuning_array[6][2];
+    premade_tuning_lib[2][1] = tuning_array[11][2];
+    premade_tuning_lib[2][2] = tuning_array[4][3];
+    premade_tuning_lib[2][3] = tuning_array[9][3];
+    premade_tuning_lib[2][4] = tuning_array[1][4];
+    premade_tuning_lib[2][5] = tuning_array[6][4];
+
+    premade_tuning_lib[3][0] = tuning_array[6][2];
+    premade_tuning_lib[3][1] = tuning_array[1][3];
+    premade_tuning_lib[3][2] = tuning_array[6][3];
+    premade_tuning_lib[3][3] = tuning_array[11][3];
+    premade_tuning_lib[3][4] = tuning_array[3][4];
+    premade_tuning_lib[3][5] = tuning_array[8][4];
+
+    premade_tuning_lib[4][0] = tuning_array[4][2];
+    premade_tuning_lib[4][1] = tuning_array[11][2];
+    premade_tuning_lib[4][2] = tuning_array[4][3];
+    premade_tuning_lib[4][3] = tuning_array[9][3];
+    premade_tuning_lib[4][4] = tuning_array[1][4];
+    premade_tuning_lib[4][5] = tuning_array[6][4];
+
+    premade_tuning_lib[5][0] = tuning_array[3][2];
+    premade_tuning_lib[5][1] = tuning_array[10][2];
+    premade_tuning_lib[5][2] = tuning_array[3][3];
+    premade_tuning_lib[5][3] = tuning_array[8][3];
+    premade_tuning_lib[5][4] = tuning_array[0][4];
+    premade_tuning_lib[5][5] = tuning_array[5][4];
+
+    premade_tuning_lib[6][0] = tuning_array[1][2];
+    premade_tuning_lib[6][1] = tuning_array[8][2];
+    premade_tuning_lib[6][2] = tuning_array[1][3];
+    premade_tuning_lib[6][3] = tuning_array[6][3];
+    premade_tuning_lib[6][4] = tuning_array[10][3];
+    premade_tuning_lib[6][5] = tuning_array[3][4];
+
+    premade_tuning_lib[7][0] = tuning_array[7][2];
+    premade_tuning_lib[7][1] = tuning_array[1][3];
+    premade_tuning_lib[7][2] = tuning_array[6][3];
+    premade_tuning_lib[7][3] = tuning_array[10][3];
+    premade_tuning_lib[7][4] = tuning_array[1][4];
+    premade_tuning_lib[7][5] = tuning_array[6][4];
+
+    premade_tuning_lib[8][0] = tuning_array[7][2];
+    premade_tuning_lib[8][1] = tuning_array[11][2];
+    premade_tuning_lib[8][2] = tuning_array[6][3];
+    premade_tuning_lib[8][3] = tuning_array[11][3];
+    premade_tuning_lib[8][4] = tuning_array[3][4];
+    premade_tuning_lib[8][5] = tuning_array[6][4];
+
+    premade_tuning_lib[9][0] = tuning_array[4][2];
+    premade_tuning_lib[9][1] = tuning_array[11][2];
+    premade_tuning_lib[9][2] = tuning_array[4][3];
+    premade_tuning_lib[9][3] = tuning_array[11][3];
+    premade_tuning_lib[9][4] = tuning_array[4][4];
+    premade_tuning_lib[9][5] = tuning_array[8][4];
+
+    premade_tuning_lib[10][0] = tuning_array[8][2];
+    premade_tuning_lib[10][1] = tuning_array[3][3];
+    premade_tuning_lib[10][2] = tuning_array[8][3];
+    premade_tuning_lib[10][3] = tuning_array[0][4];
+    premade_tuning_lib[10][4] = tuning_array[3][4];
+    premade_tuning_lib[10][5] = tuning_array[8][4];
+}
 // TODO:
 /*
 *   Work on Homescreen GUI -- done-ish
