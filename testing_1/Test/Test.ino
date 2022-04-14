@@ -1154,7 +1154,7 @@ void ICACHE_RAM_ATTR button_left_pressed() {
 
 void ICACHE_RAM_ATTR button_center_pressed() {
     noInterrupts();
-    delay(120);
+    delay(150);
     button_flags[0] = true;
     button_flags[2] = true;
 
