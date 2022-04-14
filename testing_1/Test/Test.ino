@@ -108,6 +108,7 @@ float tuning_base[12][2] = { // This is to use to find the octave we're in
     {783.99, 3.56} // G
 };
 
+
 float tuning_array[12][7] = { // Based on A - 440 Standard
         {12.98, 25.96, 51.91, 103.83, 207.65, 415.30, 830.61}, // Ab/G# - Octaves
         {13.75, 27.50, 55.00, 110.00, 220.00, 440.00, 880.00}, // A Octaves
@@ -122,7 +123,7 @@ float tuning_array[12][7] = { // Based on A - 440 Standard
         {23.12, 46.25, 92.50, 185.00, 369.99, 739.99, 1479.98}, // F#/Gb - Octaves
         {24.50, 49.00, 98.00, 196.00, 392.00, 783.99, 1567.98} // G Octaves
 };
-float adjusted_lib[11][6] = {};
+
 /*
 *   Tuning library is ordered from lowest string to highest
 *   Lowest string is thickest string, highest string is thinnest
@@ -171,7 +172,7 @@ const int cent_box_values[9] = {135, 102, 72, 36, 3, -30, -63, -96, -129};
 int freq_base_A[8] = {432, 434, 436, 438, 440, 442, 444, 446};
 float adjusted_base[12][2] = {0};
 float adjusted_array[12][7] = {0};
-
+float adjusted_lib[11][6] = {0};
 
 /* FFT DEFINITIONS & VARIABLES */
 #define SAMPLES 512 //Must be a power of 2
@@ -414,7 +415,7 @@ void drawIntroScreen() {
 void drawModeSelectionScreen() {
     eraseCenterRectangle();
     erasePrevLeftTriangle();
-    if (mode_selected == 1) {
+    if (mode_selected == 0) {
         drawPrevLeftTriangle();
     } else {
         drawLeftTriangle();
@@ -460,7 +461,7 @@ void drawModeSelectionScreen() {
 void drawFreqBaseSelectionScreen(){
     eraseCenterRectangle();
     erasePrevLeftTriangle();
-    if (freq_base_A== 0) {
+    if (freq_base_selected == 0) {
         drawPrevLeftTriangle();
     } else {
         drawLeftTriangle();
@@ -1047,8 +1048,7 @@ void device_operations() {
 
                 case 9: // freq base selection screen
                     // update tuning library function go brrr
-                    if (curr_freq_base != freq_base_A[freq_base_selected])
-                        changeOfBase();
+                    changeOfBase();
                     curr_freq_base = freq_base_A[freq_base_selected];
                     screen_value = 8;
                     mode_settings_selected = 0;
@@ -1330,8 +1330,13 @@ unsigned long tuning_test(double input_freq) {
     delay(2000);
     return time1;
 }
-
-void changeOfBase() {
+/*
+  for row in tuning_array
+          adjusted_tuning_array[i][0] = algo_riddim( input_fr = tuning_array[i][0], std_fr_in, std_fr_out = freq_base_A[freq_base_selected], float table_440_const = tuning_base[i][1])
+          for col in tuning_array
+              adjusted_array[i][j] = 2 * adjusted_array[i+1][j - 1]
+*/
+void changeOfBase(){
     int i = 0, j = 0;
     for ( i = 0; i < 12; i++ ){
         tuning_array[i][0] = algo_riddim( tuning_array[i][0], curr_freq_base, freq_base_A[freq_base_selected], tuning_base[i][1] ); 
@@ -1339,88 +1344,7 @@ void changeOfBase() {
             tuning_array[i][j] = 2 * tuning_array[i][j-1];
         }
     }
-
-    assignTuningLib();
 } 
-
-void assignTuningLib() {
-    premade_tuning_lib[0][0] = tuning_array[8][2];
-    premade_tuning_lib[0][1] = tuning_array[1][3];
-    premade_tuning_lib[0][2] = tuning_array[6][3];
-    premade_tuning_lib[0][3] = tuning_array[11][3];
-    premade_tuning_lib[0][4] = tuning_array[3][4];
-    premade_tuning_lib[0][5] = tuning_array[8][4];
-
-    premade_tuning_lib[1][0] = tuning_array[7][2];
-    premade_tuning_lib[1][1] = tuning_array[0][3];
-    premade_tuning_lib[1][2] = tuning_array[5][3];
-    premade_tuning_lib[1][3] = tuning_array[10][3];
-    premade_tuning_lib[1][4] = tuning_array[2][4];
-    premade_tuning_lib[1][5] = tuning_array[7][4];
-
-    premade_tuning_lib[2][0] = tuning_array[6][2];
-    premade_tuning_lib[2][1] = tuning_array[11][2];
-    premade_tuning_lib[2][2] = tuning_array[4][3];
-    premade_tuning_lib[2][3] = tuning_array[9][3];
-    premade_tuning_lib[2][4] = tuning_array[1][4];
-    premade_tuning_lib[2][5] = tuning_array[6][4];
-    
-    premade_tuning_lib[3][0] = tuning_array[6][2];
-    premade_tuning_lib[3][1] = tuning_array[1][3];
-    premade_tuning_lib[3][2] = tuning_array[6][3];
-    premade_tuning_lib[3][3] = tuning_array[11][3];
-    premade_tuning_lib[3][4] = tuning_array[3][4];
-    premade_tuning_lib[3][5] = tuning_array[8][4];
-
-    premade_tuning_lib[4][0] = tuning_array[4][2];
-    premade_tuning_lib[4][1] = tuning_array[11][2];
-    premade_tuning_lib[4][2] = tuning_array[4][3];
-    premade_tuning_lib[4][3] = tuning_array[9][3];
-    premade_tuning_lib[4][4] = tuning_array[1][4];
-    premade_tuning_lib[4][5] = tuning_array[6][4];
-
-    premade_tuning_lib[5][0] = tuning_array[3][2];
-    premade_tuning_lib[5][1] = tuning_array[10][2];
-    premade_tuning_lib[5][2] = tuning_array[3][3];
-    premade_tuning_lib[5][3] = tuning_array[8][3];
-    premade_tuning_lib[5][4] = tuning_array[0][4];
-    premade_tuning_lib[5][5] = tuning_array[5][4];
-
-    premade_tuning_lib[6][0] = tuning_array[1][2];
-    premade_tuning_lib[6][1] = tuning_array[8][2];
-    premade_tuning_lib[6][2] = tuning_array[1][3];
-    premade_tuning_lib[6][3] = tuning_array[6][3];
-    premade_tuning_lib[6][4] = tuning_array[10][3];
-    premade_tuning_lib[6][5] = tuning_array[3][4];
-
-    premade_tuning_lib[7][0] = tuning_array[7][2];
-    premade_tuning_lib[7][1] = tuning_array[1][3];
-    premade_tuning_lib[7][2] = tuning_array[6][3];
-    premade_tuning_lib[7][3] = tuning_array[10][3];
-    premade_tuning_lib[7][4] = tuning_array[1][4];
-    premade_tuning_lib[7][5] = tuning_array[6][4];
-
-    premade_tuning_lib[8][0] = tuning_array[7][2];
-    premade_tuning_lib[8][1] = tuning_array[11][2];
-    premade_tuning_lib[8][2] = tuning_array[6][3];
-    premade_tuning_lib[8][3] = tuning_array[11][3];
-    premade_tuning_lib[8][4] = tuning_array[3][4];
-    premade_tuning_lib[8][5] = tuning_array[6][4];
-
-    premade_tuning_lib[9][0] = tuning_array[4][2];
-    premade_tuning_lib[9][1] = tuning_array[11][2];
-    premade_tuning_lib[9][2] = tuning_array[4][3];
-    premade_tuning_lib[9][3] = tuning_array[11][3];
-    premade_tuning_lib[9][4] = tuning_array[4][4];
-    premade_tuning_lib[9][5] = tuning_array[8][4];
-
-    premade_tuning_lib[10][0] = tuning_array[8][2];
-    premade_tuning_lib[10][1] = tuning_array[3][3];
-    premade_tuning_lib[10][2] = tuning_array[8][3];
-    premade_tuning_lib[10][3] = tuning_array[0][4];
-    premade_tuning_lib[10][4] = tuning_array[3][4];
-    premade_tuning_lib[10][5] = tuning_array[8][4];
-}
 // TODO:
 /*
 *   Work on Homescreen GUI -- done-ish
@@ -1431,6 +1355,6 @@ void assignTuningLib() {
 *   Tuning bar: only one bar moving, rather than the whole set of bars filling?
 *   __________________________________________
 *   Save custom tuning? i.e. custom lib?
-*   change from 440 to 4XX intonation -- Done
+*   change from 440 to 4XX intonation
 *   Test on other stringed instrument?
 */
