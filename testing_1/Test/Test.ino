@@ -81,7 +81,7 @@ int motor_speed;
 bool motor_flag;
 bool button_flags[4] = {false, false, false, false}; // [MAIN FLAG, RIGHT BUTTON, CENTER BUTTON, LEFT BUTTON]
 
-int test_value = 0;
+int button_value = 0;
 
 int screen_value = 0;
 int mode_selected = 0;
@@ -450,13 +450,6 @@ void drawModeSelectionScreen() {
     }
 }
 
-/*
-    for row in tuning_array
-        adjusted_tuning_array[i][0] = algo_riddim( input_fr = tuning_array[i][0], std_fr_in, std_fr_out = freq_base_A[freq_base_selected], float table_440_const = tuning_array[i][1])
-        for col in tuning_array
-            adjusted_array[i][j] = 2 * adjusted_array[i+1][j - 1]
- */
-
 void drawFreqBaseSelectionScreen(){
     eraseCenterRectangle();
     erasePrevLeftTriangle();
@@ -604,7 +597,7 @@ void drawPluckStringScreen() {
     delay(500);
     unsigned long myTime;
     double peak = fft();
-    myTime = tuning_test(peak);
+    myTime = string_tuning(peak);
     display.setCursor(98, 113);
     // display.setTextSize(2);
     // display.println("TIME: " + (String)(myTime));
@@ -840,7 +833,7 @@ void spinMotorSharp(int time) { // Increases tension
 }
 
 void device_operations() {
-    switch (test_value) {
+    switch (button_value) {
         case 1: // LEFT
 
             switch (screen_value) {
@@ -954,7 +947,7 @@ void device_operations() {
 
             }
 
-            test_value = 0;
+            button_value = 0;
             break;
 
         case 2: // CENTER
@@ -1058,7 +1051,7 @@ void device_operations() {
                     break;
             }
 
-            test_value = 0;
+            button_value = 0;
             break;
 
         case 3: // RIGHT
@@ -1123,7 +1116,7 @@ void device_operations() {
                     break;
             }
 
-            test_value = 0;
+            button_value = 0;
             break;
     }
 }
@@ -1176,28 +1169,28 @@ void button_operations() {
     noInterrupts();
 
     if (button_flags[1]) { // BUTTON LEFT
-        test_value = 1;
+        button_value = 1;
         button_flags[1] = false;
     }
 
     if (button_flags[2]) { // BUTTON CENTER
-        test_value = 2;
+        button_value = 2;
         button_flags[2] = false;
     }
 
     if (button_flags[3]) { // BUTTON RIGHT
-        test_value = 3;
+        button_value = 3;
         button_flags[3] = false;
     }
 
     interrupts();
 }
 
-// Algo_riddim calculates the tuning after adjusting the A-440 value;
+// adjusted_tuning calculates the tuning after adjusting the A-440 value;
 // Currently the static inputs in this function are for the D# values going from A@432 to A@444
-float algo_riddim(float input_fr, int std_fr_in, int std_fr_out, float table_440_const) { // Finding shift from 4XX to 4XX freq
-    float output_freq;
-    float base_out = base_freq_calc(tuning_base[7][0], tuning_base[7][1], freq_base_A[0], freq_base_A[6]);
+double adjusted_tuning(float input_fr, int std_fr_in, int std_fr_out, float table_440_const) { // Finding shift from 4XX to 4XX freq
+    double output_freq;
+    double base_out = base_freq_calc(tuning_base[7][0], tuning_base[7][1], freq_base_A[0], freq_base_A[6]);
     double octave = octave_calc(base_out, input_fr);
 
     // int oct = octave_calc( tuning_base[4][0], tuning_array[4][1]);
@@ -1220,9 +1213,9 @@ double octave_calc(float base_freq, float input_freq) {
     return octave_out;
 }
 
-float base_freq_calc(float fr_table_base, float fr_table_const, int freq_std_in, int freq_std_out) {
-    float base_out;
-    float temp_base;
+double base_freq_calc(float fr_table_base, float fr_table_const, int freq_std_in, int freq_std_out) {
+    double base_out;
+    double temp_base;
 
     // Goes from fr_std_in to A@440
     if (freq_std_in < 440) {
@@ -1245,7 +1238,7 @@ double cents_calculate(double input_freq, double ref_freq) {
     return cents;
 }
 
-unsigned long tuning_test(double input_freq) {
+unsigned long string_tuning(double input_freq) {
     double target_freq = premade_tuning_lib[library_selected][string_selected]; // From premade_tuning_lib array
     double current_cents;
     double freq_diff;
@@ -1322,14 +1315,13 @@ unsigned long tuning_test(double input_freq) {
     tone(BUZZ, 60);
     delay(100);
     noTone(BUZZ);
-    delay(2000);
     return time1;
 }
 
 void changeOfBase(){
     int i = 0, j = 0;
     for ( i = 0; i < 12; i++ ){
-        tuning_array[i][0] = algo_riddim( tuning_array[i][0], curr_freq_base, freq_base_A[freq_base_selected], tuning_base[i][1] ); 
+        tuning_array[i][0] = adjusted_tuning( tuning_array[i][0], curr_freq_base, freq_base_A[freq_base_selected], tuning_base[i][1] ); 
         for( j = 1; j < 7; j++){
             tuning_array[i][j] = 2 * tuning_array[i][j-1];
         }
