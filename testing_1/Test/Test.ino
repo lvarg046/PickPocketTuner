@@ -477,7 +477,7 @@ void drawFreqBaseSelectionScreen(){
     display.setCursor(30, 10);
     display.println("Pick Base");
 
-    display.setCursor(70, 110);
+    display.setCursor(90, 110);
     display.println((String)(freq_base_A[freq_base_selected]));
 }
 
@@ -500,11 +500,12 @@ void drawSelectSettingsOrModeScreen() {
 
     switch (mode_settings_selected) {
         case 0: // Mode 0: Auto Mode, Goes through all strings
-            display.println("Select Mode     ");
+            display.println("Select Mode                   ");
             break;
 
         case 1: // Mode 1: Individual String Mode
-            display.println("Change Settings    ");
+            display.println("  Change    ");
+            display.println("   Settings    ");
             break;
     }
 }
